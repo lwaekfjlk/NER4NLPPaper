@@ -1,0 +1,2422 @@
+GLUE
+General Language Understanding Evaluation benchmark
+SQuAD
+Stanford Question Answering Dataset
+SST
+Stanford Sentiment Treebank
+Penn Treebank
+MultiNLI
+Multi-Genre Natural Language Inference
+IMDb Movie Reviews
+Visual Question Answering
+VQA
+SNLI
+Stanford Natural Language Inference
+Visual Genome
+QNLI
+Question-answering NLI
+ConceptNet
+Natural Questions
+WikiText-2
+MS MARCO
+Microsoft Machine Reading Comprehension Dataset
+Flickr30k
+Universal Dependencies
+CoNLL-2003
+DBpedia
+MRPC
+Microsoft Research Paraphrase Corpus
+CLEVR
+Compositional Language and Elementary Visual Reasoning
+SuperGLUE
+AG News
+AG’s News Corpus
+CoLA
+Corpus of Linguistic Acceptability
+CNN/Daily Mail
+TriviaQA
+WikiText-103
+VoxCeleb2
+RCV1
+Reuters Corpus Volume 1
+MSR-VTT
+HotpotQA
+MPQA Opinion Corpus
+Multi-Perspective Question Answering
+FEVER
+Fact Extraction and VERification
+DailyDialog
+Visual Question Answering v2.0
+VQA v2.0
+RACE
+ReAding Comprehension dataset from Examinations
+MultiWOZ
+Multi-domain Wizard-of-Oz
+XNLI
+Cross-lingual Natural Language Inference
+VCTK
+CSTR VCTK Corpus
+WMT 2014
+C4
+Colossal Clean Crawled Corpus
+ICDAR 2013
+NewsQA
+ATIS
+Airline Travel Information Systems
+WSC
+Winograd Schema Challenge
+Conceptual Captions
+SICK
+Sentences Involving Compositional Knowledge
+DROP
+Discrete Reasoning Over Paragraphs
+MSVD
+Microsoft Research Video Description Corpus
+SNIPS
+SNIPS Natural Language Understanding benchmark
+GQA
+CommonsenseQA
+CoQA
+Conversational Question Answering Challenge
+WebText
+WikiQA
+Wikipedia open-domain Question Answering
+LJSpeech
+The LJ Speech Dataset
+WikiSQL
+RefCOCO
+WebQuestions
+HowTo100M
+BoolQ
+Boolean Questions
+COPA
+Choice of Plausible Alternatives
+ROCStories
+ActivityNet Captions
+MuST-C
+IAM
+IAM Handwriting
+NELL
+Never Ending Language Learning
+VRD
+Visual Relationship Detection dataset
+CORD-19
+FCE
+First Certificate in English
+QuAC
+Question Answering in Context
+WMT 2016
+Billion Word Benchmark
+CodeSearchNet
+LRW
+Lip Reading in the Wild
+SentEval
+ANLI
+Adversarial NLI
+BC5CDR
+BioCreative V CDR corpus
+BioASQ
+Biomedical Semantic Indexing and Question Answering
+SearchQA
+COCO Captions
+Charades-STA
+SWAG
+Situations With Adversarial Generations
+VisDial
+Visual Dialog
+Wizard of Wikipedia
+XQuAD
+MLQA
+MultiLingual Question Answering
+ATOMIC
+TACRED
+The TAC Relation Extraction Dataset
+WebNLG
+FewRel
+Few-Shot Relation Classification Dataset
+MELD
+Multimodal EmotionLines Dataset
+OLID
+Offensive Language Identification Dataset
+SimpleQuestions
+SGD
+Schema-Guided Dialogue
+TVSum
+Title-based Video Summarization Dataset
+Hate Speech
+SCAN
+Simplified versions of the CommAI Navigation tasks
+ARC
+AI2 Reasoning Challenge
+Flickr30K Entities
+YouCook2
+Word Sense Disambiguation: a Unified Evaluation Framework and Empirical Comparison
+CMU-MOSEI
+MultiRC
+Multi-Sentence Reading Comprehension
+NarrativeQA
+Yahoo! Answers
+DocRED
+GENIA
+MCTest
+NCBI Disease
+VCR
+Visual Commonsense Reasoning
+WinoGrande
+Microsoft Academic Graph
+Jester
+Jester dataset
+PAWS-X
+TyDi QA
+Typologically Diverse Question Answering
+WiC
+Words in Context
+FIGER
+Fine-Grained Entity Recognition
+SHAPES
+Swarm Heuristics based Adaptive and Penalized Estimation of Splines
+TVQA
+CBT
+Children’s Book Test
+DiDeMo
+Distinct Describable Moments
+NEWSROOM
+CORNELL NEWSROOM
+PAWS
+Paraphrase Adversaries from Word Scrambling
+R2R
+Room-to-Room
+LibriTTS
+BLUE
+Biomedical Language Understanding Evaluation
+ASPEC
+Asian Scientific Paper Excerpt Corpus
+MRQA
+PIQA
+Physical Interaction: Question Answering
+OpenBookQA
+CoNLL-2012
+LAMBADA
+GYAFC
+Grammarly’s Yahoo Answers Formality Corpus
+SPIDER
+Hateful Memes
+LRA
+Long-Range Arena
+ReCoRD
+Douban
+Douban Conversation Corpus
+LSMDC
+Large Scale Movie Description Challenge
+SciERC
+GAP Coreference Dataset
+LIAR
+e-SNLI
+CoNLL-2014 Shared Task: Grammatical Error Correction
+MovieQA
+Visual7W
+WikiMatrix
+MIND
+MIcrosoft News Dataset
+OK-VQA
+Outside Knowledge Visual Question Answering
+TrecQA
+Text Retrieval Conference Question Answering
+JFLEG
+JHU FLuency-Extended GUG corpus
+S2ORC
+WNUT 2017
+WNUT 2017 Emerging and Rare entity recognition
+ConvAI2
+Conversational Intelligence Challenge 2
+FUNSD
+Form Understanding in Noisy Scanned Documents
+ALFRED
+Action Learning From Realistic Environments and Directives
+EPIC-KITCHENS-100
+GuessWhat?!
+CoNLL 2002
+SAMSum Corpus
+KP20k
+WinoBias
+LRS2
+Lip Reading Sentences 2
+WikiHow
+COCO-Text
+ECB+
+extension to the EventCorefBank
+VIST
+Visual Storytelling
+CLUE
+Chinese Language Understanding Evaluation Benchmark
+Multi-News
+QASC
+Question Answering via Sentence Composition
+SNLI-VE
+VQG
+Visual Question Generation
+Referring Expressions for DAVIS 2016 & 2017
+UMLS
+CosmosQA
+Math23K
+Math23K for Math Word Problem Solving
+WikiBio
+Wikipedia Biography Dataset
+ReferItGame
+Semantic Scholar
+CodeXGLUE
+Hate Speech and Offensive Language
+MIMIC-CXR
+TextVQA
+WikiHop
+WritingPrompts
+OntoNotes 5.0
+AIDA CoNLL-YAGO
+CC100
+CELEX
+KILT
+KILT Benchmark
+ListOps
+Sentence Compression
+ReDial
+VizWiz
+VizWiz-VQA
+ACE 2005
+ACE 2005 Multilingual Training Corpus
+DuReader
+MINC
+Materials in Context Database
+NLVR
+Natural Language Visual Reasoningnatural language for visual reasoning
+mC4
+CMRC
+Chinese Machine Reading Comprehension 2018
+NomBank
+E2E
+End-to-End NLG Challenge
+LCSTS
+Quora Question Pairs
+BEIR
+Benchmarking IR
+DEMAND
+Diverse Environments Multi-channel Acoustic Noise Database
+MTNT
+RAVEN
+CLINC150
+GoEmotions
+How2
+OpenWebText
+QUASAR-T
+QUestion Answering by Search And Reading – Trivia
+RealNews
+TabFact
+WikiLarge
+ELI5
+New York Times Annotated Corpus
+VATEX
+Video And TEXt
+DREAM
+MetaQA
+MoviE Text Audio QA
+The Pile
+WikiSum
+Bio
+Bio AMR Corpus
+DAQUAR
+DRCD
+Delta Reading Comprehension Dataset
+Recipe1M+
+RotoWire
+UDC
+Ubuntu Dialogue Corpus
+CommonGen
+EmoContext
+MLDoc
+Multilingual Document Classification Corpus
+ComplexWebQuestions
+ParaCrawl
+Weibo NER
+ACE 2004
+ACE 2004 Multilingual Training Corpus
+TGIF-QA
+CUHK-PEDES
+English Web Treebank
+WikiTableQuestions
+MathQA
+QA-SRL
+QUASAR
+QUestion Answering by Search And Reading
+TVQA+
+WikiMovies
+CANARD
+A Dataset for Question-in-Context Rewriting
+CMRC 2018
+Chinese Machine Reading Comprehension 2018
+CoNaLa
+CMU CoNaLa, the Code/Natural Language Challenge
+EmotionLines
+InsuranceQA
+emrQA
+DuoRC
+ISEAR
+International Survey on Emotion Antecedents and Reactions
+EmpatheticDialogues
+MemeTracker
+OSCAR
+ReClor
+ShARC
+Shaping Answers with Rules through Conversation
+WebQuestionsSP
+WebQuestions Semantic Parses Dataset
+XTREME
+Cross-Lingual Transfer Evaluation of Multilingual Encoders
+CARER
+Contextualized Affect Representations for Emotion Recognition
+E-commerce
+MATH
+PubMedQA
+Quoref
+WMT 2018
+DDI
+ETHICS
+FLORES-101
+HumanEval
+RTE
+Recognizing Textual Entailment
+SemEval-2018 Task 9: Hypernym Discovery
+TurkCorpus
+MedMentions
+MuTual
+ST-VQA
+WMT 2015
+CCNet
+Localized Narratives
+MAMS
+Multi Aspect Multi-Sentiment
+MultiCoNER
+PAQ
+Probably Asked Questions
+Panlex
+SemEval-2013 Task 2
+WOS
+Web of Science Dataset
+Xia and Ding, 2019
+ASSET
+BLiMP
+Benchmark of Linguistic Minimal Pairs
+DeepFix
+IPM NEL
+Derczynski IPM Named Entity Linking
+Reddit TIFU
+TGIF
+Tumblr GIF
+WebVid
+BUCC
+Building and Using Comparable Corpora
+CC12M
+Conceptual 12M
+Dialogue State Tracking Challenge
+Multi-Domain Sentiment Dataset v2.0
+SParC
+Semantic Parsing in Context
+Tatoeba
+WMT 2020
+Worldtree
+CrossTask
+DocVQA
+EmoryNLP
+GEM
+Generation, Evaluation, and Metrics
+LogiQA
+SCUT-CTW1500
+ToTTo
+Wizard-of-Oz
+CoS-E
+Commonsense Explanations Dataset
+EVALution
+Open Entity
+SentiMix
+decaNLP
+Natural Language Decathlon Benchmark
+A2D Sentences
+Sentences for the Actor-Action Dataset (A2D
+CSQA
+CoSQL
+Conversational Text-to-SQL Challenge
+DialogRE
+FigureQA
+Holl-E
+LDC2017T10
+Abstract Meaning Representation (AMR) Annotation Release 2.0
+Learning to Rank Challenge
+Yahoo! Learning to Rank Challenge
+MR
+MR Movie Reviews
+STS 2014
+SciCite
+WikiReading
+Amazon Product Data
+MLSUM
+MultiLingual SUMmarization
+OCNLI
+Original Chinese Natural Language Inference
+PeerRead
+ProPara
+TQA
+Textbook Question Answering
+BREAK
+BookTest
+Doc2Dial
+Doc2Dial: Document-grounded Dialogue
+GLUCOSE
+LAION-400M
+MQ2008
+MULTEXT-East
+SQA
+SequentialQA
+TIMIT
+TIMIT Acoustic-Phonetic Continuous Speech Corpus
+AMR Bank
+Abstract Meaning Representation
+ActivityNet-QA
+BIOSSES
+Biomedical Semantic Similarity Estimation System
+CCAligned
+Douban Conversation Corpus
+FakeNewsNet
+Few-NERD
+Paralex
+RecipeQA
+RxR
+Room-across-Room
+Samanantar
+TextCaps
+TweetEval
+WIT
+Wikipedia-based Image Text
+doc2dial
+20 Newsgroups
+BillSum
+ChID
+Chinese IDiom dataset
+DART
+ImageNet-P
+MCScript
+MKQA
+Multilingual Knowledge Questions and Answers
+MOROCO
+MOldavian and ROmanian Dialectal COrpus
+MasakhaNER
+PIT
+Paraphrase and Semantic Similarity in Twitter
+PMIndia
+Re-TACRED
+Revised-TACRED
+SVAMP
+Simple Variations on Arithmetic Math word Problems
+ShapeWorld
+WMT 2016 News
+WMT 2016 News Translation Task
+WikiLingua
+XCOPA
+XSum
+C3
+CoVoST
+Event2Mind
+Resume NER
+SciREX
+iSarcasmEval
+DIRHA
+Distant-speech Interaction for Robust Home Applications
+Fashion-Gen
+GovReport
+HELP
+Image Paragraph Captioning
+ProofWriter
+RoboCup
+WI-LOCNESS
+Cambridge English Write & Improve & LOCNESS
+AISHELL-3
+Django
+EXTREME CLASSIFICATION
+Extreme Multi-label Classification
+GSM8K
+GenericsKB
+MMLU
+Massive Multitask Language Understanding
+ReferIt3D
+SUBJ
+Subjectivity dataset
+Senseval-2
+SentiCap
+Snopes
+Spot-the-diff
+Text8
+WIQA
+What-If Question Answering
+2010 i2b2/VA
+CLEVR-Humans
+CrossWOZ
+DVQA
+Data Visualizations via Question Answering
+Evidence Inference
+FQuAD
+French Question Answering Dataset
+HOC
+Hallmarks of Cancer
+ICDAR 2017
+IndicCorp
+MIR-1K
+Natural Stories
+QReCC
+ROPES
+Reasoning Over Paragraph Effects in Situations
+TAT-QA
+TempEval-3
+TempEval-3: events, times, and temporal relations
+WikiSplit
+CODAH
+COmmonsense Dataset Adversarially-authored by Humans
+ChemProt
+CliCR
+ECHR
+EURLEX57K
+George Washington
+Inspired
+JESC
+Japanese-English Subtitle Corpus
+MeQSum
+MedQuAD
+Medical Question Answering Dataset
+QAMR
+Question-Answer Meaning Representation Dataset
+SIMMC
+Situated and Interactive Multimodal Conversations
+SciDocs
+Shifts
+StockNet
+United Nations Parallel Corpus
+ASTE-Data-V2
+AdversarialQA
+DuRecDial
+FNC-1
+Fake News Challenge Stage 1
+KVQA
+Knowledge-aware VQA
+LABR
+Large-Scale Arabic Book Reviews
+MLQE-PE
+Multilingual Quality Estimation and Automatic Post-editing Dataset
+MTL-AQA
+Mathematics Dataset
+Pushshift Reddit
+QASPER
+ScisummNet
+Taskmaster-1
+UR-FUNNY
+Who-did-What
+Who did What
+XGLUE
+ZESHEL
+ArSarcasm-v2
+CLOTH
+CLOze test by TeacHers
+CMU DoG
+CMU Document Grounded Conversations Dataset
+CovidQA
+CrisisMMD
+DEFT Corpus
+DUC 2004
+FlickrStyle10K
+Humicroedit
+KELM
+KdConv
+Knowledge-driven Conversation
+KorNLI
+MedHop
+Multi-Modal CelebA-HQ
+MultiFC
+OTT-QA
+OntoNotes 4.0
+OntoNotes Release 4.0
+Opusparcus
+PubMed RCT
+PubMed 200k RCT
+Qulac
+RCTW-17
+Reading Chinese Text in the Wild
+SciQ
+VALUE
+Video-And-Language Understanding Evaluation
+VQA-CP
+WCEP
+Wikipedia Current Events Portal
+iSarcasm
+APPS
+Automated Programming Progress Standard
+AVSD
+Audio-Visual Scene-Aware Dialog
+ArtEmis
+BIG-bench
+Beyond the Imitation Game Benchmark
+CLEVR-Ref+
+CPED
+Chinese Personalized and Emotional Dialogue
+How2QA
+How2Sign
+A Large-scale Multimodal Dataset for Continuous American Sign Language
+Hutter Prize
+JNLPBA
+KPTimes
+MMD
+Multimodal Dialogs
+Multilingual Reuters
+Multilingual Reuters Collection
+QuaRTz
+QuaRTz Dataset
+SIQA
+Social Interaction QA
+SMHD
+Self-reported Mental Health Diagnoses
+TOPv2
+Task Oriented Parsing v2
+TextComplexityDE
+Touchdown Dataset
+TweetQA
+BLURB
+Biomedical Language Understanding and Reasoning Benchmark
+Broad Twitter Corpus
+DialoGLUE
+EntailmentBank
+FEVEROUS
+Fact Extraction and VERification Over Unstructured and Structured information
+Funcom
+KLUE
+Korean Language Understanding Evaluation
+Ohsumed
+PreCo
+QuaRel
+ReCAM
+SemEval-2021 Task 4: Reading Comprehension of Abstract Meaning
+Refer-YouTube-VOS
+Semantic Textual Similarity (2012 - 2016)
+STS
+StrategyQA
+Visual Madlibs
+AmazonQA
+ArSarcasm
+ChaosNLI
+ConvQuestions
+CxC
+Crisscrossed Captions
+DSTC7 Task 1
+Dialog System Technology Challenges Task 1
+FLUE
+French Language Understanding Evaluation
+FinQA
+GLGE
+General Language Generation Evaluation
+HeadQA
+KorSTS
+LitBank
+MED
+Monotonicity Entailment Dataset
+MultiDoc2Dial
+MultiDoc2Dial: Modeling Dialogues Grounded in Multiple Documents
+Natural Instructions
+NetHack Learning Environment
+PARANMT-50M
+PUBHEALTH
+ParCorFull
+Parallel Corpus Annotated with Full Coreference
+Quasimodo
+ReQA
+Retrieval Question-Answering
+Torque
+Violin
+VIdeO-and-Language INference
+XL-Sum
+e-SNLI-VE
+AKCES-GEC
+AQUA-RAT
+Algebra Question Answering with Rationales
+CAS-VSR-W1k (LRW-1000)
+CHALET
+Cornell House Agent Learning Environment
+CONAN
+COunter NArratives through Nichesourcing
+COVID-19 Fake News Dataset
+COVID19 Fake News Detection in English
+DWIE
+Deutsche Welle corpus for Information Extraction
+FM-IQA
+Freestyle Multilingual Image Question Answering
+GeoS
+HappyDB
+IIRC
+Incomplete Information Reading Comprehension
+Implicit Hate
+MedQA-USMLE
+QMSum
+SciTail
+SemArt
+TG-ReDial
+TRIPOD
+TuRnIng POint Dataset
+Talk the Walk
+TechQA
+The TechQA Dataset
+TextOCR
+WiC-TSV
+Words-in-Context: Target Sense Verification
+WikiEvents
+arXiv Summarization Dataset
+ANTIQUE
+Arabic Text Diacritization
+BIOMRC
+BookSum
+CMU Movie Summary Corpus
+ChFinAnn
+CoDraw
+CoSQA
+Code Search and Question Answering
+Dakshina
+DialogSum
+Duolingo STAPLE Shared Task
+ECtHR
+European Court of Human Rights Cases
+EntityQuestions
+FewCLUE
+FreebaseQA
+HOList
+How2R
+MEDIQA-AnS
+MEDIQA-Answer Summarization
+NoReC
+Norwegian Review Corpus
+PhraseCut
+Project CodeNet
+RRS
+Restoration-200k for Response Selection
+SCROLLS
+Standardized CompaRison Over Long Language Sequences
+Terms of Service
+VQA-E
+WikiConv
+eQASC
+28 Ghz wireless channel dataset
+A-OKVQA
+ART Dataset
+Abductive Reasoning in narrative Text
+ASAP
+Automated Student Assessment Prize
+Acronym Identification
+BiRD
+Bigram Relatedness Dataset
+BiasBios
+Bias in Bios
+CH-SIMS
+CLEVR-Dialog
+CQASUMM
+ClaimBuster
+DiscoFuse
+Enron Email Dataset
+FM2
+FoolMeTwice
+GRIT
+General Robust Image Task Benchmark
+GUM
+Georgetown University Multilayer corpus
+Global Voices
+GrailQA
+Strongly Generalizable Question Answering
+Griddly
+HINT3
+IGLUE
+Image-Grounded Language Understanding Evaluation
+IQUAD
+Interactive Question Answering Dataset
+KLEJ
+Kleister NDA
+KnowIT VQA
+LDC2020T02
+Abstract Meaning Representation (AMR) Annotation Release 3.0
+LectureBank
+MixSNIPs
+Moral Stories
+MuSe-CaR
+Multimodal Sentiment Analysis in Car Reviews
+PersonalDialog
+RUSSE
+Russian Words in Context (based on RUSSE
+Reddit Corpus
+SUTD-TrafficQA
+SelQA
+TVC
+TV show Captions
+TaxiNLI
+WikiAtomicEdits
+AQUAINT
+ArSentD-LEV
+Ascent KB
+BC2GM
+Business Scene Dialogue
+CDCP
+Cornell eRulemaking Corpus
+CITE
+CJRC
+Chinese judicial reading comprehension
+CMRC 2019
+Chinese Machine Reading Comprehension 2019
+CUAD
+Contract Understanding Atticus Dataset
+ConditionalQA
+DaNetQA
+Yes/no Question Answering Dataset for the Russian
+ETHOS
+multi-labEl haTe speecH detectiOn dataSet
+FairytaleQA
+FarsTail
+French Timebank
+HONEST
+Hurtful Sentence Completion in English Language Models
+IBM-Rank-30k
+IBM-ArgQ-Rank-30kArgs
+ILDC
+Indian Legal Documents Corpus
+InfoTabS
+KIT Motion-Language
+LCQMC
+Large-scale Chinese Question Matching Corpus
+Lani
+MATRES
+Multi-Axis Temporal RElations for Start-points
+MOD
+Meme incorporated Open-domain Dialogue
+MedNLI
+Medical Natural Language Inference
+Memotion Analysis
+SemEval-2020 Task 8: Memotion Analysis -- The Visuo-Lingual Metaphor!
+Mr. TYDI
+MutualFriends
+NELA-GT-2018
+OMICS
+Open Mind Indoor Common Sense
+OrangeSum
+PEYMA
+PhotoBook
+PlotQA
+QA2D
+Question to Declarative Sentence (QA2D) Dataset
+QUASAR-S
+QUestion Answering by Search And Reading – Stack Overflow
+RAVEN-FAIR
+RECCON
+RIMES
+Reconnaissance & Indexation de données Manuscrites et de fac similÉS / Recognition & Indexing of handwritten documents & faxes
+Rainbow
+ReINTEL
+RefSeer
+RicoSCA
+SPoC
+Pseudocode-to-Code
+StylePTB
+TEMPO
+Localizing Moments in Video with Temporal Language
+TableBank
+TutorialBank
+ViGGO
+VisualMRC
+VisualMRC: Machine Reading Comprehension on Document Images
+VizWiz-Captions
+WMT 2018 News
+WMT 2018 News Translation Task
+WNLaMPro
+WordNet Language Model Probing
+WeChat
+WebQA
+Wiki-ZSL
+XFORMAL
+XQA
+iVQA
+Instructional Video Question Answering
+xSID
+Cross-lingual Slot and Intent Detection
+BBQ
+Bias Benchmark for QA
+BIMCV COVID-19
+BMELD
+CIRR
+Compose Image Retrieval on Real-life images
+COVID-Fact
+CaseHOLD
+Case Holdings On Legal Decisions
+ClariQ
+CoDa
+The Color Dataset
+ComQA
+ContractNLI
+ContractNLI: A Dataset for Document-level Natural Language Inference for Contracts
+DaNE
+Danish Dependency Treebank
+FaVIQ
+Fact Verification from Information-seeking Questions
+Fakeddit
+French Wikipedia
+Gumar Corpus
+Hindi Visual Genome
+HowMany-QA
+HumanML3D
+IS-A
+JuICe
+JuICe Dataset
+KnowledgeNet
+MEDIA
+MLQE
+MultiLingual Quality Estimation
+MM-COVID
+Multilingual and Multidimensional COVID-19 Fake News Data Repository
+MaRVL
+Multicultural Reasoning over Vision and Language
+MassiveText
+MedVidQA
+Medical Video Question Answering
+MemexQA
+MiniF2F
+MovieFIB
+Movie Fill-in-the-Blank
+Multi-XScience
+OntoGUM
+OpoSum
+Overruling
+PARus
+Choice of Plausible Alternatives for Russian language
+PFN-PIC
+PFN Picking Instructions for Commodities Dataset
+PathVQA
+PixelHelp
+ProtoQA
+QA-SRL Bank 2.0
+RELX
+RRS Ranking Test
+Restoration-200k for Response Selection with Ranking Test Set
+RWSD
+The Winograd Schema Challenge (Russian
+RadGraph
+RadGraph: Extracting Clinical Entities and Relations from Radiology Reports
+RedCaps
+Reddit Conversation Corpus
+Screen2Words
+SituatedQA
+SubjQA
+TERRa
+Textual Entailment Recognition for Russian
+TalkDown
+TalkSumm
+UKP
+UKP Argument Annotated Essays
+USR-TopicalChat
+VISUELLE
+Vlogs
+VoxForge
+WikiTableT
+XL-BEL
+hasPart KB
+unarXive
+word2word
+AGQA
+Action Genome Question Answering
+Advising Corpus
+ArCOV-19
+BanglaLekhaImageCaptions
+Bentham
+Bentham project
+BiPaR
+CQADupStack
+CaSiNo
+CoNaLa-Ext
+CoNaLa Extended With Question Text
+Coached Conversational Preference Elicitation
+ConvoSumm
+CrossNER
+DDRel
+DISRPT2019
+DISRPT2019 shared task on Discourse Unit Segmentation and Connective Detection
+DL-HARD
+Deep Learning Hard
+DialFact
+DocNLI
+DogWhistle
+EHR-Rel
+Earnings Call
+Finer
+Finnish News Corpus for Named Entity Recognition
+GAD
+Gene Associations Database
+GICoref
+Gender Inclusive Coreference
+GeoWebNews
+GooAQ
+HJDataset
+HKR
+Handwritten Kazakh and Russian (HKR) Database for Text Recognition
+HowToVQA69M
+HurricaneEmo
+IIIT-ILST
+IndoSum
+Italian disinformation
+LexGLUE
+LiDiRus
+Linguistic Diagnostic for Russian
+ManyTypes4Py
+MeDAL
+Microsoft Research Multimodal Aligned Recipe Corpus
+MuSeRC
+Russian Multi-Sentence Reading Comprehension
+NLmaps
+New3
+OPIEC
+Open Information Extraction Corpus
+OpenViDial
+PASTEL
+PATS
+Pose Audio Transcript Style
+PHM2017
+ParaQA
+QVHighlights
+Query-based Video Highlights
+QuerYD
+RCB
+Russian Commitment Bank
+RSTPReid
+Real Scenario Text-based Person Re-identification
+RuCoS
+Russian Reading Comprehension with Commonsense Reasoning
+SOREL-20M
+Sophos/ReversingLabs-20 Million
+SP-10K
+Sarcasm Corpus V2
+SciTLDR
+SherLIiC
+Species-800
+TAC 2010
+TREC-10
+TREC-10 Question Classification
+TRECVID-AVS16 (IACC.3)
+TRECVID-AVS17 (IACC.3)
+TRECVID-AVS18 (IACC.3)
+TURL
+Twitter News URL Corpus
+Taiga Corpus
+An open-source corpus for machine learning.
+TekGen
+TimeBankPT
+Portuguese TimeBank
+USR-PersonaChat
+V2C
+Video-to-Commonsense
+VANiLLa
+VLEP
+Video-and-Language Event Prediction
+VQA-CE
+VQA Counterexamples
+Video Storytelling
+Vietnamese intent detection and slot filling
+VisPro
+WDC-Dialogue
+WikiCREM
+WikiSem500
+Wikipedia Person and Animal Dataset
+X-SRL
+irc-disentanglement
+ABCD
+Action-Based Conversations Dataset
+AMALGUM
+A Machine Annotated Lookalike of GUM
+AW-OIE
+All Words OpenIE
+BC4CHEMD
+BioCreative IV Chemical compound and drug name recognition
+BCOPA-CE
+A Balanced COPA Test Set with cause-effect as alternatives
+BUG
+BiToD
+BuzzFeed-Webis Fake News Corpus 2016
+CCPM
+Chinese Classical Poetry Matching
+CI-MNIST
+Correlated and Imbalanced MNIST
+CLAMS
+Cross-linguistic Analysis of Models on Syntax
+CMeEE
+Chinese Medical Named Entity Recognition Dataset
+COVID-Q
+CREAK
+CVSS
+ChEBI-20
+Chart2Text
+Chart Summarization Dataset
+CoAuthor
+CoDesc
+CoVaxLies v1
+CoWeSe
+Corpus Web Salud Espanol
+CoarseWSD-20
+CodeContests
+Coveo Data Challenge Dataset
+DAGW
+Danish Gigaword
+DAWT
+Densely Annotated Wikipedia Texts
+DISRPT2021
+DISRPT2021 shared task on Discourse Unit Segmentation, Connective Detection and Discourse Relation Classification
+DKhate
+DMQA
+DeepMind Q&A
+DaN+
+Danbooru2020
+DiS-ReX
+Duolingo SLAM Shared Task
+Duolingo Spaced Repetition Data
+Emotional Dialogue Acts
+FIQA
+Financial Opinion Mining and Question Answering
+FacetSum
+Famulus
+Finnish Paraphrase Corpus
+GVFC
+Gun Violence Frame Corpus
+Gazeta
+GeoCoV19
+Geometry3K
+HLA-Chat
+Hate Counter
+Headlines dataset
+Healthline
+IPAC
+Icelandic Parallel Abstracts Corpus
+IWSLT 2019
+IconQA
+Icon Question Answering
+InferWiki
+Italian Crime News
+from Gazzetta di Modena [2011-2021]
+JEC-QA
+JParaCrawl
+Jamendo Corpus
+JerichoWorld
+KRAUTS
+Korpus of newspapeR Articles with Underlinded Temporal expressionS
+Klexikon
+Klexikon: A German Dataset for Joint Summarization and Simplification
+Konzil
+Konzilsprotokolle_C
+L3CubeMahaSent
+LEAF-QA
+LINNAEUS
+Logic2Text
+M-VAD Names
+M-VAD Names Dataset
+MAD
+MATINF
+Maternal and Infant Dataset
+MDID
+Multimodal Document Intent Dataset
+MOLD
+Marathi Offensive Language Dataset
+MUGEN
+MuMiN
+MuMu
+MultiSense
+MultiSubs
+MultiSubs: A Large-scale Multimodal and Multilingual Dataset
+NELA-GT-2019
+NFCorpus
+NaturalProofs
+OLPBENCH
+OTTers
+Open PI
+PNT
+Parsing Time Normalizations
+PROST
+Physical Reasoning about Objects Through Space and Time
+PatTR
+Patent Translation Resource
+Patzig
+PerKey
+PhoNER COVID19
+QAConv
+QC-Science
+Quizbowl
+READ 2016
+HTR Dataset ICFHR 2016
+RONEC
+Romanian Named Entity Corpus
+RR
+Review-Rebuttal
+RUN
+The RUN Dataset
+RWWD
+Real World Worry Dataset
+ReaSCAN
+ReaSCAN: Compositional Reasoning in Language Grounding
+RiSAWOZ
+Ricordi
+Ruddit
+SCICAP
+SEDE
+Stack Exchange Data Explorer
+SNARE
+SPIRS
+SPOT
+Sentiment Polarity Annotations Dataset
+SSN
+Semantic Scholar Network
+STAIR Captions
+Schiller
+Shiller
+Schwerin
+Shmoop Corpus
+Signal-1M Related Tweets
+SkillSpan
+Hard and Soft Skill Extraction from English Job Postings
+Spanish TimeBank 1.0
+Standardized Project Gutenberg Corpus
+Summarizing Source Code using a Neural Attention Model
+TaL Corpus
+The Tongue and Lips Corpus
+Taskmaster-2
+Tasty Videos
+The BioScope Corpus
+The Little Prince
+The Little Prince Corpus
+TimeDial
+TutorialVQA
+Twitter Abusive Behavior
+Twitter100k
+UIT-ViWikiQA
+VMSMO
+Weibo21
+Who’s Waldo
+WikiCLIR
+WikiGraphs
+WikiText-TL-39
+Wikipedia Title
+Winoground
+X-Fact
+Youtubean
+i2b2 De-identification Dataset
+Informatics for Integrating Biology and the Bedside (i2b2) Project — De-identification Dataset
+italki NLI
+methods2test
+30MQA
+30M Factoid Question-Answer Corpus
+5k_presetation_slides
+5000 presentation slide pairs
+ACL Title and Abstract Dataset
+ADE-Affordance
+AM2iCo
+Adversarial and Multilingual Meaning in Context
+ARC-DA
+ARC Direct Answer Questions
+AWS Documentation
+AdvGLUE
+Adversarial GLUE
+Almawave-SLU
+ArCOV19-Rumors
+AraCOVID19-MFH
+AraCOVID19-MFH: Arabic COVID-19 Multi-label Fake News and Hate Speech Detection Dataset
+AutoChart
+BC7 NLM-Chem
+BioCreative VII NLM-Chem
+BCNB
+Early Breast Cancer Core-Needle Biopsy WSI
+Basque TimeBank
+Benchmark for Neural Paraphrase Detection
+BiasCorp
+BioRED
+BnB
+Bongard-HOI
+BoostCLIR
+BugRepo
+Bug Reports
+CCPE-M
+Coached Conversational Preference Elicitation dataset for Movies
+CIC
+Catalonia Independence Corpus
+CICERO
+Contextualized Commonsense Inference in Dialogues
+CLUECorpus2020
+CODA-19
+COMPARE
+COVID-CQ
+CQR
+Contextual Query Rewrite
+CSPubSum
+CUGE
+Catalan TimeBank 1.0
+Chilean Waiting List
+Chinese Classifier
+Chinese Gigaword
+CiteWorth
+Climate Claims
+CoVaxLies v2
+Com2Sense
+Complementary Commonsense
+Common Crawl
+Curiosity
+Czech restaurant information
+DAST
+Danish Stance
+DRI Corpus
+Dr. Inventor Multi-layer Scientific Corpus
+DUC 2007
+Document Understanding Conferences
+DanFEVER
+DeCOCO
+DesireDB
+Discovery Dataset
+
+
+E-KAR
+Benchmark for Explainable Knowledge-intensive Analogical Reasoning
+EDGAR-CORPUS
+EDNA-Covid
+ELEVATER
+Evaluation of Language-augmented Visual Task-level Transfer
+EMOTyDA
+Emotion aware Dialogue Act
+EVIL
+EXEQ-300k
+Eedi Dataset
+EtymDB 2.0
+ExpMRC
+FACTIFY
+a dataset on multi-modal fact verification
+FAKBAT
+FOBIE
+Focused Open Biological Information Extraction
+FakeNewsAMT & Celebrity
+FeedbackQA
+FindVehicle
+Frames Dataset
+GGPONC
+German Guideline Program in Oncology NLP Corpus
+GeBioCorpus
+GeoQA
+Geometric Question Answering
+GermanQuAD
+GitHub Typo Corpus
+GitHub-Python
+Grep-BiasIR
+Gun Violence Corpus
+Hateful Users on Twitter
+HatemojiCheck
+Horne 2017 Fake News Data
+HuRDL
+Human-Robot Dialogue Learning Corpus
+IG-1B-Targeted
+Illness-dataset
+Illness multi-domain textual dataset
+IndicNLP Corpus
+InfographicVQA
+Instantiation Dataset
+ItaCoLA
+JNC
+Japanese News Corpus
+JUSTICE
+JUSTICE: A Dataset for Supreme Court’s Judgment Prediction
+JaQuAD
+Jamendo Lyrics
+Japanese Word Similarity
+K-SportsSum
+KUAKE-QIC
+Query Intent Classification Dataset
+KazakhTTS
+Large-Scale CLIR Dataset
+Lyra
+M5Product
+MCVQA
+Multilingual and Code-mixed Visual Question Answering
+MDD
+Movie Dialog dataset
+MIZAN
+MRS
+Multilingual Reply Suggestion
+MSDA
+Multi-source domain adaptation dataset for text recognition
+MUSE
+MedDialog
+MedMCQA
+Metaphorical Connections
+MilkQA
+MindCraft
+Morph Call
+MoviePlotEvents
+CMU Movie Summary Corpus with Events
+Moviescope
+MuCGEC
+Multi-Reference Multi-Source Evaluation Dataset for Chinese Grammatical Error Correction
+MultiEURLEX
+MultiReQA
+Multilingual Dataset for Training and Evaluating Diacritics Restoration Systems
+NELA-GT-2020
+NEMO-Corpus
+NEMO Hebrew NER and Morphology Corpus
+NLU++
+NLLU++ : A Multi-Label, Slot-Rich, Generalisable Dataset for Natural Language Understanding in Task-Oriented Dialogue
+Natural Hazards Twitter Dataset
+NewsCLIPpings
+NewsPH-NLI
+NewsTSC
+ODSQA
+Open-Domain Spoken Question Answering
+OGTD
+Offensive Greek Tweet Dataset
+P3
+Psychophysical Patterns Dataset
+ParaShoot
+PhoMT
+Pile of Law
+PubMed Cognitive Control Abstracts
+CogText
+PubMed PICO Element Detection Dataset
+PubTables-1M
+PubMed Tables One Million
+PyTorrent
+QTuna
+Quda
+Query-Focused Video Summarization Dataset
+R2VQ
+Recipe-to-Video Questions
+RETWEET
+RISeC
+Recipe Instruction Semantics Corpus
+RTASC
+ROBIN Technical Acquisition Speech Corpus
+RadioTalk
+Rare Diseases Mentions in MIMIC-III
+Rare disease mention annotations from a sample of MIMIC-III clinical notes
+RareDis corpus
+ReviewQA
+SCDE
+SSD
+Sub-Slot Dialogue dataset
+STACKEX
+Saint Gall
+Scruples
+SemClinBr
+Sentimental LIAR
+SoftAttributes
+SoftAttributes: Relative movie attribute dataset for soft attributes
+SoundDescs
+Spades
+Semantic PArsing of DEclarative Sentences
+SportSett
+Stanford Schema2QA Dataset
+StyleKQC
+SubEdits
+Swords
+Stanford Word Substitution benchmark
+THYME-2016
+TIAGE
+TRECVID-AVS19 (V3C1)
+TVRecap
+TaoDescribe
+TicketTalk
+Tilde MODEL Corpus
+Tilde Multilingual Open Data for European Languages
+ToLD-Br
+Toxic Language Detection for Brazilian Portuguese
+ToxiGen
+Twitter Conversations Dataset
+UA-GEC
+UA-GEC: Grammatical Error Correction and Fluency Corpus for the Ukrainian Language
+UDIVA
+UIT-ViCTSD
+UIT Vietnamese Constructive and Toxic Speech Detection
+UPFD
+User Preference-aware Fake News Detection
+UPFD-GOS
+User Preference-aware Fake News Detection
+VALSE
+VALSE: A Task-Independent Benchmark for Vision and Language Models Centered on Linguistic Phenomena
+VAST
+VAried Stance Topics
+VGaokao
+VIST-Edit
+VISUELLE2.0
+Vent
+ViQuAE
+VideoNavQA
+WEC-Eng
+Weibo-COV
+WiLI-2018
+WikiCaps
+WikiHowQA
+WikiNEuRal
+WikiSRS
+Wikidata-Disamb
+X-CSQA
+X-WikiRE
+XOR-TYDI QA
+XWINO
+YACLC
+Yet Another Chinese Learner Corpus
+YASO
+ZS-F-VQA
+e-ViL
+esXNLI
+map2seq
+pioNER
+pn-summary
+60k Stack Overflow Questions
+60k Stack Overflow Questions from 2016-2020 classified into three categories based on their quality
+A Dataset of Journalists' Interactions with Their Readership
+A Dataset of State-Censored Tweets
+A2Dre
+Subset of A2D Sentences which are not trivial
+A2Dre+
+Extension of A2D sentences where trivial cases where filtered
+AAVE/SAE Paired Dataset
+AESI
+Athens Emotional States Inventory
+AGRR-2019
+AG’s Corpus
+AG's corpus of news articlesNews
+AIT-QA
+Airline Industry Table QA
+ANTILLES
+ANTILLES: An Open French Linguistically Enriched Part-of-Speech Corpus
+AP
+Adversarial Paraphrase
+APE
+Automatic Post-Editing
+ARCT
+Argument Reasoning Comprehension Task
+ASL-Phono
+ASLG-PC12
+English-ASL Gloss Parallel Corpus 2012
+AWARE
+AWARE: Aspect-Based Sentiment Analysis Dataset of Apps Reviews for Requirements Elicitation
+AbstRCT - Neoplasm
+AbuseAnalyzer Dataset
+Advice Seeking Questions
+Alexa Point of View
+Amazon-PQA
+Amharic Error Corpus
+An Amharic News Text classification Dataset
+AndroidHowTo
+AnnoMI
+Anonymized Keystrokes Dataset
+AnswerSumm
+Antibody Watch
+ApartmenTour
+Apiza Corpus
+AraCovid19-SSD
+Arendt
+ArgSciChat
+Armenian Paraphrase Detection Corpus
+ArxivPapers
+AskParents
+AutoWeakS
+Automating Dynamic Consent
+AuxAD
+AuxAI
+B-T4SA
+BBAI Dataset
+Black-box Agent Integration
+BCWS
+Bilingual Contextual Word Similarity
+BEAMetrics
+BLANCA
+BLM-17m
+BLP
+Blackout Poetry Dataset
+BNATURE
+BSARD
+Belgian Statutory Article Retrieval Dataset
+Bambara Language Dataset
+BanglaEmotion
+BanglaEmotion: A Benchmark Dataset for Bangla Textual Emotion Analysis
+BenchIE
+Bengali Ekman's Six Basic Emotions Corpus
+BestRev
+Understanding Peer Review of Software Engineering Papers
+BiRdQA
+BiSECT
+Bianet
+BigNews
+BioLeaflets
+Biographical
+Biographical: A Semi-Supervised Relation Extraction Dataset
+BugClassify
+CANDOR Corpus
+CANDOR = Conversation: A Naturalistic Dataset of Online Recordings
+CAVES
+A Dataset to facilitate Explainable Classification and Summarization of Concerns towards COVID Vaccines
+CC-News
+CommonCrawl News dataset
+CECW
+Colorful Extended Cleanup World
+CEREC
+Corpus for Entity Resolution in Email Conversations
+CHIP-CDN
+Clinical Diagnosis Normalization Dataset
+CHIP-CTC
+CHIP-STS
+Semantic Textual Similarity Dataset
+CHORD
+CHOrus Recognition Dataset
+CHQ-Summ
+Consumer Healthcare Question Summarization
+CI-ToD
+CLEVR-Math
+CLIP
+CLIP: A Dataset for Extracting Action Items for Physicians from Hospital Discharge Notes
+CLIPS
+Corpora e Lessici dell'Italiano Parlato e Scritto
+CLUES
+Constrained Language Understanding Evaluation Standard
+CLUES (Classifier Learning Using natural language ExplanationS)
+CLaRO
+CMeIE
+Chinese Medical Information Extraction Dataset
+CNewSum
+COPA-HR
+COPA-SSE
+COSTRA 1.0
+COVID-19 & Election
+COVID19-CountryImage
+COVMis-Stance
+CPP simulated evaluation
+CS
+Chinese Simile
+CSAbstruct Dataset
+CSFCube
+CSI Screenplay Summarization Corpus
+CSL-2022
+Chinese Scientific Literature
+CTFW
+CTI-to-MITRE
+CUHK-QA
+Capriccio
+Sentiment Analysis + Data Drift
+CareCall
+CareCall for Seniors
+CareerCoach 2022
+Casino Reviews
+Online reviews of North American Casinos from Google Reviews
+ChAII - Hindi and Tamil Question Answering
+Chinese AI and Law (CAIL) 2018
+Chinese Literature NER RE
+Circa
+CiteSum
+ClarQ
+Clinical Admission Notes from MIMIC-III
+CoNLL 2017 Shared Task - Automatically Annotated Raw Texts and Word Embeddings
+CoVERT
+A Corpus of Fact-checked Biomedical COVID-19 Tweets
+CodeQueries
+CodeSwitch-Reddit
+ComSum
+CommitBART
+Commonsense-Dialogues
+Comparative Question Completion
+Composed Quora
+Concadia
+ConcurrentQA Benchmark
+Congolese Swahili – French parallel text corpora
+Contextualised Polyseme Word Sense Dataset v2
+Controversial News Topic Datasets
+ConvRef
+CoronaVis
+Councils in Action
+Counting Probe
+Counting Probe based on Visual7W
+Covid-HeRA
+Credibility Factors 2020
+Cryptics
+CzEng 2.0 Parallel Corpus
+D-OCC
+Dynamic-OneCommon Corpus
+D3
+DBLP Discovery Dataset
+DAIS
+DBpedia NIF
+DME VQA dataset
+Diabetic Macular Edema VQA dataset
+DODa
+Darija Open Dataset
+DR.BENCH
+Diagnostic Reasoning Benchmark for clinical natural language processing
+DSTC7 Task 2
+Dialog System Technology Challenges Task 2
+DUC 2006
+Document Understanding Conferences
+DaReCzech
+Dataset for text relevance ranking in Czech
+Data Science Problems
+Data and Material for 'Interpersonal Conflicts During Code Review'
+DataCLUE
+Dataset of Legal Documents
+Dataset of Propaganda Techniques of the State-Sponsored Information Operation of the People's Republic of China
+Dataset: Relationship extraction for knowledge graph creation from biomedical literature (Gene-Disease relationships)
+DebateSum
+DiaKG
+Dialog-based Language Learning dataset
+DialogueFairness
+DisKnE
+Disease Knowledge Evaluation
+Disfl-QA
+DistNLI
+DocBank-TB
+DocBank-Table
+DpgMedia2019
+DuLeMon
+Baidu Long-term Memory Conversation
+E-Manual Corpus
+ECTF
+Early COVID-19 Twitter Fake news
+EDT
+EFO-1-QA
+ELITR ECA
+EMU
+Edited Media Understanding
+EPIC30M
+ERD
+Educational Resource Discovery
+EVI
+EVIL-Decoders
+EVIL-Encoders
+EgoProceL
+Elsevier OA CC-BY
+EmailSum
+Email Thread Summarization
+EmoCause
+ErAConD
+Error Annotated Conversational Dialog Dataset for Grammatical Error Correction
+Essay-BR
+Europarl ConcoDisco Dataset
+Evidence Inference 2.0
+Evidence-based Factual Error Correction
+ExBAN
+ExBAN Corpus (Explanations for BAyesian Networks
+ExaASC
+Extended Minecraft Corpus dataset
+FFHQ-Text
+FICS PCB Image Collection (FPIC)
+FIG-Loneliness
+FIJO
+French Insurance Job Offer dataset
+FSOCO
+FSVQA
+Full-Sentence Visual Question Answering
+FTR-18
+FarsBase-KBP
+Fashion-MMT
+FewGLUE_64_labeled
+A new version of FewGLUE with 64 training examples
+FewSOL
+A Dataset for Few-Shot Object Learning in Robotic Environments
+FiNER-139
+Fig-QA
+Fine-Grained R2R
+FinnSentiment
+FixMyPose
+Flat Real World Simulink Models
+FloDial
+Flowchart Grounded Dialogs Dataset
+FoCus
+Call for Customized Conversation: Customized Conversation Grounding Persona and Knowledge
+Fon-French Dataset
+Food.com Recipes and Interactions
+FreSaDa
+FusedChat
+GASP
+GD-NLI
+Generated Debiased NLI Datasets
+GD-VCR
+GIF Reply Dataset
+GINC
+Generative IN-Context learning Dataset
+GLips
+German Lips
+GPI corpus
+Government Privacy Instructions Corpus
+GameWikiSum
+GeBiD
+Geometric shapes Bimodal Dataset
+GermanDPR
+Gigaword Entailment
+Gutenberg Dialog Dataset
+Gutenberg Poem Dataset
+HLGD
+Headline Grouping Dataset
+HS-BAN
+HateScore
+HateScore : Human-in-the-Loop and Neutral Korean Multi-label Online Hate Speech Dataset
+HeadlineCause
+Helsinki Prosody Corpus
+Hephaestus
+Hephaestus: A large scale multitask dataset towards InSAR understanding
+HeriGraph
+Multimodal Machine Learning Datasets on Graphs of Heritage Values and Attributes
+HiNER-collapsed
+HiNER: A Large Hindi Named Entity Recognition Dataset
+HiNER-original
+HiNER: A Large Hindi Named Entity Recognition Dataset
+HoaxItaly
+Houses Dataset
+HowSumm
+HumAID
+Human-Annotated Disaster Incidents Data
+HumanMT
+Hummingbird
+IAM Dataset
+A Comprehensive and Large-Scale Dataset for Integrated Argument Mining Tasks
+IAPR TC-12
+IAPR TC-12 Benchmark
+IBM Debater Mention Detection Benchmark
+ICFG-PEDES
+Identity-Centric and Fine-Grained Person Description Dataset
+IG-3.5B-17k
+IRLCov19
+ISOT Fake News Dataset
+Ice Hockey News Dataset
+Iconary
+Identifying Machine-Paraphrased Plagiarism
+IgboNLP Datasets
+ImageCoDe
+Image Retrieval from Contextual Descriptions
+Incremental Dialog Dataset
+IndiaPoliceEvents
+IndoNLI
+Interpretable STS
+Irish Wikipedia
+Itihasa
+JAMUL
+JApanese MUlti-Length Headline Corpus
+JDDC 2.0
+JIT Dataset
+Jejueo Interview Transcripts
+JSS Dataset
+Jejueo Single Speaker Speech
+JUSThink Dialogue and Actions Corpus
+Jigsaw Toxic Comment Classification Dataset
+JobStack
+KIND
+Kessler Italian Named-entities Dataset
+KMIR
+Knowledge Memorization, Identification, and Reasoning
+KUAKE-QQR
+Query-Query Relevance Dataset
+KUAKE-QTR
+Query-Title Relevance Dataset
+KazNERD
+Kite
+Kobest
+Kompetencer
+Danish Job Postings Classification Dataset
+Korean Hate Speech Evaluation Datasets
+Korean UnSmile Dataset
+SmilegateAI Korean UnSmile Dataset
+Korpus Malti
+LARC
+Language-annotated Abstraction and Reasoning
+LC-QuAD 2.0
+Largescale Complex Question Answering Dataset
+LIGHT-Quests
+LSFB Datasets
+French Belgian Sign Language Datasets
+LSICC
+Large Scale Informal Chinese Corpus
+Laptop-ACOS
+Lazaro Corpus
+LeNER-Br
+LeT-Mi
+Levantine Twitter dataset for Misogynistic language
+Lenta Short Sentences
+LitMind Dictionary
+Liu et al. Corpus
+Live Comment Dataset
+M-Phasis
+A Feature-Based Corpus of Hate Online
+MASSIVE
+MAST
+Multi-Attributed Structured Text-to-face Dataset
+MCoNaLa
+Multilingual CoNaLa
+MDIA
+MFAQ
+MFRC
+Moral Foundations Reddit Corpus
+MINTAKA
+MIntRec
+MK-SQuIT
+MLQuestions
+MMChat
+MS-CXR
+Making the Most of Text Semantics to Improve Biomedical Vision-Language Processing
+MSJudge
+MS^2
+Multi-Document Summarization of Medical Studies
+MT40K
+MUStARD
+Multimodal Sarcasm Detection Dataset
+MUStARD++
+MWE-CWI
+Mafiascum
+MalayalamMixSentiment
+Mapping Topics in 100,000 Real-Life Moral Dilemmas
+Tuan Dung nguyen
+Marmara Turkish Coreference Resolution Corpus
+MatriVasha:
+MatriVasha: Compound Character atasetD
+MeSHup
+A Corpus for Full Text Biomedical Document Indexing
+MedDG
+MedVidCL (Medical Video Classification)
+Medical Case Report Corpus
+Medical Wiki Paralell Corpus for Medical Text Simplification
+Mega-COV
+MentSum
+Mental Health Summarization Dataset
+Message Content Rephrasing
+MetaCLIR
+MetaEval
+Metric-Type of Numerical Tables
+MobIE
+Modern Hebrew Sentiment Dataset
+Monant Medical Misinformation
+MuCo-VQA
+MuDoCo_QueryRewrite
+The MuDoCo dataset with Query Rewrite Annotations
+MuLD
+Multitask Long Document Benchmark
+MuMiN-large
+MuMiN-medium
+MuMiN-small
+MultiCite
+MultiOpEd
+MultiWOZ-coref
+Multilingual Persuasion Detection
+Multilingual TOP
+Multilingual Terms of Service
+N15News
+NCI
+New Corpus for Ireland
+NELA-GT-2021
+NLI-PT
+NQuAD
+Nuclear Question Answering Dataset
+NText
+NYT-H
+Nakdimon-test
+Nakdimon-train
+Names pairs dataset
+Narvik Road Dataset
+DIT4BEARs Smart Road Dataset
+Natural sentences that contain *any*
+New Dataset From Paper
+NorDial
+NovelCraft
+OAGT
+Paper Topic Dataset
+OFEQ-10k
+OQRanD
+ORCAS-I
+Queries Annotated with Intent using Weak Supervision
+Online retail dataset
+OpenMEVA
+OpenViDial 2.0
+OrdinalDataset
+Ordinal Encoding Data set
+PART-OF
+PCFG SET
+Probabilistic Context Free Grammar String Edit Task
+PDNC
+Project Dialogism Novel Corpus
+PELD
+PET
+PET: A new Dataset for Process Extraction from Natural Language Text
+PET: A new Dataset for Process Extraction from Natural Language Text
+PETCI
+PETCI: A Parallel English Translation Dataset of Chinese Idioms
+PLOD-filtered
+PLOD: An Abbreviation Detection Dataset for Scientific Documents
+PLOD-unfiltered
+PLOD: An Abbreviation Detection Dataset for Scientific Documents
+PMC-SA
+PMC Structured Abstracts
+PMPC
+Persona Match on Persona-Chat
+POINTREC
+POLIT-FALSE-n-LEGIT NEWS DB 2016-2017
+PQ-decaNLP
+Paraphrase Questions - decaNLP
+PQuAD
+Persian Question Answering Dataset
+PSI
+IUPUI-CSRC Pedestrian Situated Intent
+PaSa
+Pan+ChiPhoto
+Paper Field
+ParsTwiner
+Part Whole Relations
+PatentMatch
+Peer to Peer Hate
+PeerSum
+PerCQA
+PerSenT
+Perla Dataset
+Perla Depression Screening Dataset
+Permuted bAbI dialog task
+PersianQA
+Persian Question Answering Dataset
+Personal Events in Dialogue Corpus
+Persuasion Strategies
+PheMT
+Phishing and Benign Websites
+Phrase-in-Context
+PhysNLU
+Pirá
+Pirá: A Bilingual Portuguese-English Dataset for Question-Answering about the Ocean
+PoKi
+PointQA
+Pow-Wow
+PrOntoQA
+Proof and Ontology-Generated Question-Answering
+Pre-Contest Workshop Slidedeck
+Pre-trained Transliterated Embeddings for Indian Languages
+ProSLU
+Profile-based Spoken Language Understanding
+Processed Twitter
+Product Page
+ProsocialDialog
+Proto Summ
+PsyQA
+PubMed Paper Reading Dataset
+PubMed Term, Abstract, Conclusion, Title Dataset
+Pump and dump dataset
+Python Programming Puzzles (P3)
+Q-Pain
+QALD-9-Plus
+QBSUM
+RL-ISN-dataset
+RPCD
+Reddit Photo Critique Dataset
+RTC
+Reddit Time Corpus
+RUSLAN
+RUSS Dataset
+ReactionGIF
+Reddit Norm Violations
+Refer360°
+Reflective essays on CS TA experience
+Regressors-Regressions Dataset
+Relational Pattern Similarity Dataset
+RepLab 2013
+Replication Data for: Singapore Soundscape Site Selection Survey (S5)
+Identification of Characteristic Soundscapes of Singapore via Weighted k-means Clustering
+Restaurant-ACOS
+ReviewRobot Dataset
+Ritter PoS
+Ritter Twitter part-of-speech tagging
+RoomEnv
+The Room Environment
+RotoEdit
+Rotowire-Modified
+RuMedBench
+Russian Event2Mind
+SART
+SBU-WSD-Corpus
+SCIMAT
+SES
+Spanish Emotional Speech
+SG-NLG
+Schema-Guided Natural Language Generation
+SHAJ
+Spoken Hate in the Albanian Jargon
+SILICONE Benchmark
+SILICONE
+SMC Text Corpus
+SOLO
+SPARTQA
+SPAtial Reasoning on Textual Question Answering
+SPARTQA -
+SPAtial Reasoning on Textual Question Answering.
+SQuAD-it
+SSD_ID
+Sub-Slot Dialogue dataset id number domain
+SSD_NAME
+Sub-Slot Dialogue dataset name domain
+SSD_PHONE
+Sub-Slot Dialogue dataset phone domain
+SSD_PLATE
+Sub-Slot Dialogue dataset license plate number domain
+STAIR Actions Captions
+STR-2021
+SV-Ident
+Survey Variable Identification
+SVDC Fake News Dataset
+SVLD
+Social Vision and Language Dataset
+SWSR
+Sina Weibo Sexism Review
+SYMON
+Synopses of Movie Narratives
+SaRoCo
+Satire Dataset
+SciCo
+Scientific Concept Induction Corpus
+SciDuet
+SciGen
+ScienceExamCER
+ScienceQA
+Scientific statement classification dataset from arXMLiv 08.2018
+Scifi TV Shows
+Scifi TV Show Plot Summaries & Events
+Scroll Readability Dataset
+Search4Code
+SegmentedTables
+SentimentArcs: Sentiment Reference Corpus for Novels
+ShARe/CLEF 2014: Task 2 Disorders
+ShadowLink
+Short Stories, Adjudicator Scores and Written Reflections
+Short Text Font Dataset
+Slim
+Source Code Tagger Training Set
+State Traversal Observation Tokens
+StepGame
+Student Reflections, Coding and Coding Scheme
+Study data
+Sturm
+SubSumE
+Subjective Discourse
+SumeCzech-NER
+SurveyBank
+Synthetic parallel sentences that contain *any*
+TASTEset
+TBCOV
+TFix's Code Patches Data
+THRED
+Two-Hop Relation Extraction Dataset
+TLDR9+
+TRECVID-AVS20 (V3C1)
+TREx-2p
+TUSC
+Tweets from US and Canada
+TWT-16
+Talk2Nav
+Task2Dial
+Taskography
+PDDLGym Taskography
+Tatoeba Translation Challenge
+TempQA-WD
+TemporalWiki
+TexRel
+TextWorld KG
+The 'Call me sexist but' Dataset (CMSB)
+The Best Sarcasm Annotated Dataset in Spanish
+The ComMA Dataset v0.2
+The Contextual TV Dataset
+CTV
+The Mafia Dataset
+TinySocial
+ToM QA
+Top Comment or Flop Comment?
+Top Comment or Flop Comment? User Engagement in Online News Discussions
+TopiOCQA
+Topic modeling topic coverage dataset
+TraVLR
+Traditional and Context-specific Spam Twitter
+TuGebic
+A Turkish-German Bilingual Code-Switching Corpus
+TupleInf Open IE Dataset
+TurkQA
+Twitch-FIFA
+Twitter Abusive Context
+Twitter Cyberthreat Detection Dataset
+Twitter Flood
+Twitter MediaEval
+MediaEval Benchmarking Initiative for Multimedia Evaluation
+Twitter PoS VCB
+Twitter part-of-speech vote-constrained-bootstrapping
+Twitter Sentiment Analysis
+Entity-Level Twitter Sentiment Analysis Dataset
+Twitter Stance Election 2020
+Twitter US Airline Sentiment
+Twitter-COMMs
+Twitter-MEL
+UIT-ViNames
+UPFD-POL
+User Preference-aware Fake News Detection
+UQuAD
+Urdu Question Answering Dataset
+Ubuntu Chat Corpus
+Urban Dict spelling variant
+UzWordnet
+The Uzbek Wordnet
+VDQG
+Visual Discriminative Question Generation
+VQA 360°
+VQA-MHUG
+VR traffic traces
+VSR
+Visual Spatial Reasoning
+VaccineLies
+ValueNet
+VerbCL
+ViText2SQL
+VideoCC3M
+Video-Conceptual-Captions
+Viwiki-Spelling
+Vietnamese Spelling Correction Dataset
+VizWiz-VQA-Grounding
+Vāksañcayaḥ
+Sanskrit Speech Corpus by IIT Bombay
+WEB-FORUM-52
+WEB-FORUM-52 gold standard
+WIKIOG
+WITS
+Why Is This Sarcastic?
+WMT 2014 Medical
+WMT 2014 Medical Translation Task
+WMT 2015 News
+WMT 2015 News Translation Task
+WMT 2016 Biomedical
+WMT 2016 Biomedical Translation Task
+WMT 2016 IT
+WMT 2016 IT Translation Task
+WT-WT
+Will-They-Won't-They
+Water Footprint Recommender System Data
+WebEdit
+WebVidVQA3M
+Webis-ConcluGen-21
+Weibo-Douban
+WD
+Wiki-Flickr Event Dataset
+Wiki-Reliability
+Wiki-en
+Wiki-zh
+WikiBanEvasion
+Wikipedia Ban Evasion Dataset
+WikiBioCTE
+WikiContradiction
+WikiDocEdits
+WikiNLDB
+WikiPII
+WikiScenes
+WikiSuggest
+WikiWiki
+Wikidata-14M
+WildQA
+WildReceipt
+WinoGAViL
+WordNet-feelings
+Workplace Sexual Harassment
+Wukong
+XL-R2R
+Cross-lingual Room-to-Room
+XLEnt
+XTD10
+Xamarin Q&A
+ZhihuRec
+arXMLiv:08.2018
+bajer_danish_misogyny
+Bajer Online Misogyny
+bornholmsk_parallel
+Bornholmsk Parallel Text
+catbAbI LM-mode
+concatenated-bAbI
+catbAbI QA-mode
+concatenated-bAbI
+gENder-IT
+language-modeling-recommendation
+larousse_1905_wd
+mMARCO
+medisim
+needadvice
+nordic_langid
+Nordic Language Identification (DSL
+notebookcdg
+nvBench
+polstance
+Political Stance in Danish
+public_meetings
+robo-vln
+Robotics Vision-and-Language Navigation
+satp-zsm-stage1
+Replication Data for: Crossing the Linguistic Causeway: A Binational Approach for Translating Soundscape Attributes to zsm
+scb-mt-en-th-2020
+simply-CLEVR
+tida-gcn-data
+wikiHow-image
+wildFireClimateChangeTweets
+zulu-stance
+Zulu Stance
+64,378 Images Data of 1,073 Dogs' Noses
+ASSIN
+Affective Text
+AlloCine
+AmbigQA
+BNLP-Resources
+CC-DBP
+COVID-19 Disinfo
+COVID-19 Disinformation Twitter Dataset
+CVIT PIB
+Chinese Mandarin Synthesis Corpus
+Chinese Mandarin Synthesis Corpus-Female, Customer Service
+CoNLL-2000
+Coronavirus (COVID-19) Tweets Dataset
+Couples Therapy
+Couples Therapy Corpus
+CzechNewsDatasetForSTS
+DSTC 8 Track 2
+Dialog System Technology Challenges 8 Track 2
+DUC 2005
+DigiLeTs
+Digit- and Letter Trajectories
+EU-ADR
+Eduge
+Eduge news classification dataset
+FLORES-200
+ISI-PPT
+ISI_Bengali_Character
+LSARS
+Large Scale Abstractive multi-Review Summarization
+Legal Documents Entity Recognition
+Multimodal Humor Dataset
+Multimodal Humor Dataset: Predicting Laughter Tracks for Sitcoms
+NERGRIT Corpus
+NSMC
+Naver Sentiment Movie Corpus
+Parzival
+Pistachio Image Dataset
+Plaintext Jokes
+QuAIL
+Question Answering for Artificial Intelligence
+Rendered SST2
+SEN
+Sentiment analysis of Entities in News headlines
+SMCOVID19-CT
+Contact Tracing Data (from Italian SM-COVID-19 App
+STEM-ECR
+SemEval-2021 Task 11: NLPContributionGraph
+SportsSum
+TFH_Annotated_Dataset
+Thin_Film_head_relevant_Patent_Annotated_Dataset
+TRACT
+Tweets Reporting Abuse Classification Task Corpus
+TRECVID-AVS21 (V3C1)
+TiMoS
+Tropes in Movie Synopses
+UCC
+Unhealthy Comments Corpus
+UMass Citation Field Extraction
+V3C1
+the Vimeo Creative Commons Collection 1
+WMT 2021 Ge'ez-Amharic
+prachathai-67k
