@@ -33,7 +33,7 @@ def extract_from_raw(file_path):
         res.append(tmp)
     return res
 
-def generate_annotations(spans, texts):
+def generate_annotations(spans, texts, label):
     """Generate annotations from spans and texts
     Args:
         spans: a list of tuples, each tuple is the start and end index of the matched result
@@ -66,7 +66,7 @@ def generate_annotations(spans, texts):
                 'start': start,
                 'end': end,
                 'text': text,
-                'labels': ['MetricValue']
+                'labels': [label]
             },
             'from_name': 'label',
             'to_name': 'text',
@@ -101,29 +101,44 @@ def span_all(pattern, template, flags=re.IGNORECASE, filter_regex=r'(19|20)\d{2}
         match = re.search(pattern, template, flags)
     return l[1:], patterns
 
-def annotate_metrics(paragraph):
-    """Annotate all the metrics with regex
+def annotate_numbers(paragraph):
+    """Annotate all the numbers with regex
     Args:
         paragraph: string to be annotated
     Returns:
         A list of annotations, each annotation is a dictionary
     """
 
-    pattern_regex = r'(?<!table\s|fig\s|figure\s|section\s|\d.)\d+[.]?[^a-z\s][\d]*[%]?'
+    metric_regex = r'(?<!table\s|fig\s|figure\s|section\s|\d.)\d+[.]?[^a-z\s][\d]*[%]?'
     filter_regex=r'(19|20)\d{2}'
-    spans, numbers = span_all(pattern_regex, paragraph, re.IGNORECASE, filter_regex)
+    spans, numbers = span_all(metric_regex, paragraph, re.IGNORECASE, filter_regex)
 
-    return generate_annotations(spans, numbers)
+    parameter_regex = r'(?<!table\s|fig\s|figure\s|section\s|\d.)\d+[e.]?[-]?[\d]*'
+    spans_para, parameters = span_all(parameter_regex, paragraph, re.IGNORECASE, filter_regex)
+
+    annotate_numbers = generate_annotations(spans, numbers, 'MetricValue')
+    annotate_parameters = generate_annotations(spans_para, parameters, 'HyperparameterValue')
+    # merge para and number
+    for item in annotate_parameters:
+        if item['value']['text'] not in numbers:
+            annotate_numbers.append(item)
+        else:
+            index = numbers.index(item['value']['text'])
+            annotate_numbers[index]['value']['labels'].append('HyperparameterValue')
+
+    return annotate_numbers
+
 
 
 if __name__ == "__main__":
     for sentence in [
             "Figure 1: Denotation experiment finds the best input setting for data collection, that preserves meaning but diversifies styles among annotators with different personas.",
             "FiD-base and FiD-large contain L = 12 and 24 layers respectively, and we set the budget B = Lk.",
-            "We consider various regularization parameters for SVM and logistic regression (e.g., c=[0.01, 0.1, 0.25, 0.5, 0.75, 1.0]."
+            "We consider various regularization parameters for SVM and logistic regression (e.g., c=[0.01, 0.1, 0.25, 0.5, 0.75, 1.0].",
+            "The learning rate is 1e-4 and the batch size is 32.",
         ]:
     
-        annotated_data = annotate_metrics(sentence)
+        annotated_data = annotate_numbers(sentence)
         print(annotated_data)
 
     
