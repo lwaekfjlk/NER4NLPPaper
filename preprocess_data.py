@@ -33,7 +33,48 @@ def extract_from_raw(file_path):
         res.append(tmp)
     return res
 
+def generate_annotations(spans, texts):
+    """Generate annotations from spans and texts
+    Args:
+        spans: a list of tuples, each tuple is the start and end index of the matched result
+        texts: a list of strings, each string is the matched result
+    Returns:
+        A list of annotations, each annotation is a dictionary:
+        example:
 
+        [{
+            "value": {
+                "start": 88,
+                "end": 92,
+                "text": "0.01",
+                "labels": [
+                    "MetricValue"
+                ]
+            },
+            "from_name": "label",
+            "to_name": "text",
+            "type": "labels"
+        },]
+    """
+
+    annotations = []
+    assert len(spans) == len(texts)
+    for span, text in zip(spans, texts):
+        start, end = span
+        annotation = {
+            'value': {
+                'start': start,
+                'end': end,
+                'text': text,
+                'labels': ['MetricValue']
+            },
+            'from_name': 'label',
+            'to_name': 'text',
+            'type': 'labels'
+        }
+        annotations.append(annotation)
+
+    return annotations
 
 def span_all(pattern, template, flags=re.IGNORECASE, filter_regex=r'(19|20)\d{2}'):
     """Get all the spans according to the regex pattern from the template string
@@ -65,45 +106,14 @@ def annotate_metrics(paragraph):
     Args:
         paragraph: string to be annotated
     Returns:
-        A list of annotations, each annotation is a dictionary:
-        example:
-
-        [{
-            "value": {
-                "start": 88,
-                "end": 92,
-                "text": "0.01",
-                "labels": [
-                    "MetricValue"
-                ]
-            },
-            "from_name": "label",
-            "to_name": "text",
-            "type": "labels"
-        },]
+        A list of annotations, each annotation is a dictionary
     """
 
     pattern_regex = r'(?<!table\s|fig\s|figure\s|section\s|\d.)\d+[.]?[^a-z\s][\d]*[%]?'
     filter_regex=r'(19|20)\d{2}'
     spans, numbers = span_all(pattern_regex, paragraph, re.IGNORECASE, filter_regex)
 
-    annotations = []
-    for span, number in zip(spans, numbers):
-        start, end = span
-        annotation = {
-            'value': {
-                'start': start,
-                'end': end,
-                'text': number,
-                'labels': ['MetricValue']
-            },
-            'from_name': 'label',
-            'to_name': 'text',
-            'type': 'labels'
-        }
-        annotations.append(annotation)
-
-    return annotations
+    return generate_annotations(spans, numbers)
 
 
 if __name__ == "__main__":
