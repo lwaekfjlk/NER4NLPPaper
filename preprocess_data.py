@@ -109,11 +109,11 @@ def annotate_numbers(paragraph):
         A list of annotations, each annotation is a dictionary
     """
 
-    metric_regex = r'(?<!table\s|fig\s|figure\s|section\s|\d.)\d+[.]?[^a-z\s][\d]*[%]?'
+    metric_regex = r'(?<!table\s|fig\s|figure\s|section\s|\d.)\d[.]?[^a-z\s][\d]*[%]?'
     filter_regex=r'(19|20)\d{2}'
     spans, numbers = span_all(metric_regex, paragraph, re.IGNORECASE, filter_regex)
 
-    parameter_regex = r'(?<!table\s|fig\s|figure\s|section\s|\d.)\d+[e.]?[-]?[\d]*'
+    parameter_regex = r'\d+[e][-]?[\d]*'
     spans_para, parameters = span_all(parameter_regex, paragraph, re.IGNORECASE, filter_regex)
 
     annotate_numbers = generate_annotations(spans, numbers, 'MetricValue')
@@ -136,6 +136,7 @@ if __name__ == "__main__":
             "FiD-base and FiD-large contain L = 12 and 24 layers respectively, and we set the budget B = Lk.",
             "We consider various regularization parameters for SVM and logistic regression (e.g., c=[0.01, 0.1, 0.25, 0.5, 0.75, 1.0].",
             "The learning rate is 1e-4 and the batch size is 32.",
+            "We have 1 term, ",
         ]:
     
         annotated_data = annotate_numbers(sentence)
