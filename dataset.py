@@ -70,6 +70,7 @@ class ConLLDataset(Dataset):
 
         input_ids = []
         labels = []
+        attention_mask = []
 
         for instance in batch:
             instance_token_ids = [self.tokenizer.cls_token_id]
@@ -85,9 +86,14 @@ class ConLLDataset(Dataset):
             instance_labels += [-100 for _ in range(max_length - len(instance_labels))]
             labels.append(instance_labels)
 
+            valid_token_length = min(max_length, len(instance['input_ids'])+2)
+            att_mask = [1 for i in range(valid_token_length)] + [0 for i in range(max_length - valid_token_length)]
+            attention_mask.append(att_mask)
+
         return {
             'input_ids': torch.LongTensor(input_ids),
-            'labels': torch.LongTensor(labels)
+            'labels': torch.LongTensor(labels),
+            'attention_mask': torch.LongTensor(attention_mask)
         }
 
 
@@ -162,28 +168,34 @@ class ScirexDataset(Dataset):
         if max_length is None:
             max_length = batch_max_length + 2
         else:
-            max_length = min(max_length, batch_max_length+2)
+            max_length = min(max_length, batch_max_length + 2)
 
         input_ids = []
         labels = []
+        attention_mask = []
 
         for instance in batch:
             instance_token_ids = [self.tokenizer.cls_token_id]
             instance_token_ids += instance['input_ids']
-            instance_token_ids = instance_token_ids[:(max_length-1)]
+            instance_token_ids = instance_token_ids[:(max_length - 1)]
             instance_token_ids += [self.tokenizer.sep_token_id]
             instance_token_ids += [self.tokenizer.pad_token_id for _ in range(max_length - len(instance_token_ids))]
             input_ids.append(instance_token_ids)
 
             instance_labels = [-100]
             instance_labels += instance['labels']
-            instance_labels = instance_labels[:(max_length-1)]
+            instance_labels = instance_labels[:(max_length - 1)]
             instance_labels += [-100 for _ in range(max_length - len(instance_labels))]
             labels.append(instance_labels)
 
+            valid_token_length = min(max_length, len(instance['input_ids']) + 2)
+            att_mask = [1 for i in range(valid_token_length)] + [0 for i in range(max_length - valid_token_length)]
+            attention_mask.append(att_mask)
+
         return {
             'input_ids': torch.LongTensor(input_ids),
-            'labels': torch.LongTensor(labels)
+            'labels': torch.LongTensor(labels),
+            'attention_mask': torch.LongTensor(attention_mask)
         }
 
 
@@ -192,17 +204,21 @@ if __name__ == '__main__':
     from transformers import AutoTokenizer
     from torch.utils.data import DataLoader, SequentialSampler
     tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
-    # train_file = '../data/train.conll'
-    # train_dataset = ConLLDataset(train_file, tokenizer)
-    train_file = '../data/scirex/train.jsonl'
-    train_dataset = ScirexDataset(train_file, tokenizer)
+    train_file = '../data/train.conll'
+    train_dataset = ConLLDataset(train_file, tokenizer)
+    # train_file = '../data/scirex/train.jsonl'
+    # train_dataset = ScirexDataset(train_file, tokenizer)
     train_dataloader = DataLoader(train_dataset,
-                                  batch_size=32,
+                                  batch_size=2,
                                   sampler=SequentialSampler(train_dataset),
                                   collate_fn=train_dataset.collate_fn)
 
     for data in train_dataloader:
         input_ids = data['input_ids']
         labels = data['labels']
-        if input_ids.shape[1] != labels.shape[1]:
-            raise Exception
+        mask = data['attention_mask']
+        # if input_ids.shape[1] != labels.shape[1] or labels.shape[1] != mask.shape[1]:
+        print(input_ids)
+        print(labels)
+        print(mask)
+        break
