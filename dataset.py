@@ -187,7 +187,7 @@ if __name__ == '__main__':
     from torch.utils.data import DataLoader, SequentialSampler
     tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
 
-    train_file = '../data/train.conll'
+    train_file = './data/train.conll'
     train_dataset = ConLLDataset(train_file, tokenizer)
     # train_file = '../data/scirex/train.jsonl'
     # train_dataset = ScirexDataset(train_file, tokenizer)
@@ -198,5 +198,4 @@ if __name__ == '__main__':
 
     for data in train_dataloader:
         for i, j in zip(tokenizer.convert_ids_to_tokens(data['input_ids'][0]), data['labels'][0]):
-            print(i, train_dataset.id2entity[j.item()])
-        break
+            pass
