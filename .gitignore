@@ -130,3 +130,8 @@ dmypy.json
 
 # own files
 raw_data/
+data/
+checkpoints/
+*.out
+*.slurm
+*.err

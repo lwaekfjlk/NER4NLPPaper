@@ -138,7 +138,6 @@ if __name__ == "__main__":
             "The learning rate is 1e-4 and the batch size is 32.",
             "We have 1 term, ",
         ]:
-    
         annotated_data = annotate_numbers(sentence)
         print(annotated_data)
 
