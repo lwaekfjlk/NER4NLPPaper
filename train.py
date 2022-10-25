@@ -65,12 +65,10 @@ def validate(args, dev_dataloader, model):
     for data in tqdm(dev_dataloader):
         input_ids = data['input_ids'].to(args.device)
         labels = data['labels'].to(args.device)
-        outputs = model(input_ids, labels=labels)
+        mask_ids = data[['attention_mask']].to(args.device)
+        outputs = model(input_ids, labels=labels, attention_mask=mask_ids)
         loss = outputs[0]
         print(f'Validation loss: {loss}')
-
-    
-
 
 
 def train(args, model, tokenizer):
@@ -84,7 +82,8 @@ def train(args, model, tokenizer):
         for data in tqdm(train_dataloader):
             input_ids = data['input_ids'].to(args.device)
             labels = data['labels'].to(args.device)
-            outputs = model(input_ids, labels=labels)
+            mask_ids = data['attention_mask'].to(args.device)
+            outputs = model(input_ids, labels=labels, attention_mask=mask_ids)
             loss = outputs[0]
             loss.backward()
             optimizer.step()
@@ -110,8 +109,8 @@ def distributed_setup(args, model):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_name', type=str, default='checkpoints/bert-base-NER', help='model name or path')
-    parser.add_argument('--train_file', type=str, default='./data/train.conll', help='path to train file')
-    parser.add_argument('--dev_file', type=str, default='./data/dev.conll', help='path to dev file')
+    parser.add_argument('--train_file', type=str, default='./data/train.jsonl', help='path to train file, jsonl for scirex, conll for conll')
+    parser.add_argument('--dev_file', type=str, default='./data/dev.jsonl', help='path to dev file')
     parser.add_argument('--test_file', type=str, default='./data/test.conll', help='path to test file')
     parser.add_argument('--batch_size', type=int, default=4)
     parser.add_argument('--max_length', type=int, default=512)
@@ -123,15 +122,15 @@ if __name__ == '__main__':
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--output_dir', type=str, default='../output')
     parser.add_argument('--device', type=str, default='cuda')
-    parser.add_argument('--dataset', type=str, default='conll')
-    parser.add_argument('--label_num', type=int, default=15, help='number of labels, 15 for conll, 9 for scirex')
+    parser.add_argument('--dataset', type=str, default='scirex')
+    parser.add_argument('--label_num', type=int, default=9, help='number of labels, 15 for conll, 9 for scirex')
     parser.add_argument('--train', action='store_true')
     parser.add_argument('--inference', action='store_true')
     parser.add_argument('--local_rank', type=int, default=-1)
 
     args = parser.parse_args()
 
-    args.local_rank = os.environ['LOCAL_RANK']
+    args.local_rank = int(os.environ['LOCAL_RANK'])
 
 
     tokenizer = AutoTokenizer.from_pretrained(args.model_name)
