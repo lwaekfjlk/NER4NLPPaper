@@ -1,6 +1,3 @@
-from dataclasses import dataclass
-from pickletools import optimize
-from unittest import loader
 from transformers import AutoTokenizer, AutoModelForTokenClassification
 from transformers import pipeline
 import torch
@@ -10,6 +7,8 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 from torch.nn.parallel import DistributedDataParallel as DDP
 import torch.distributed as dist
+
+import os
 
 def load_dataset(args, tokenizer):
     '''
@@ -26,8 +25,14 @@ def load_dataset(args, tokenizer):
             dev_dataset = ConLLDataset(args.dev_file, tokenizer)
         else:
             raise ValueError('Invalid dataset')
-        train_dataloader = DataLoader(train_dataset,  batch_size=args.batch_size, shuffle=True, collate_fn=lambda x: train_dataset.collate_fn(x, args.max_length))
-        dev_dataloader = DataLoader(dev_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=lambda x: dev_dataset.collate_fn(x, args.max_length))
+        if torch.cuda.device_count() > 1:
+            train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset, num_replicas=dist.get_world_size(), rank=dist.get_rank(), shuffle=True)
+            dev_sampler = torch.utils.data.distributed.DistributedSampler(dev_dataset, num_replicas=dist.get_world_size(), rank=dist.get_rank(), shuffle=True)
+            train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, sampler=train_sampler, collate_fn=lambda x: train_dataset.collate_fn(x, args.max_length))
+            dev_dataloader = DataLoader(dev_dataset, batch_size=args.batch_size, sampler=dev_sampler, collate_fn=lambda x: dev_dataset.collate_fn(x, args.max_length))
+        else:
+            train_dataloader = DataLoader(train_dataset,  batch_size=args.batch_size, shuffle=True, collate_fn=lambda x: train_dataset.collate_fn(x, args.max_length))
+            dev_dataloader = DataLoader(dev_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=lambda x: dev_dataset.collate_fn(x, args.max_length))
         loader_dict['train'] = train_dataloader
         loader_dict['dev'] = dev_dataloader
         loader_dict['train'] = train_dataloader
@@ -76,7 +81,7 @@ def train(args, model, tokenizer):
     optimizer = attach_optimizer(args, model)
 
     for epoch in tqdm(range(args.num_epochs)):
-        for data in train_dataloader:
+        for data in tqdm(train_dataloader):
             input_ids = data['input_ids'].to(args.device)
             labels = data['labels'].to(args.device)
             outputs = model(input_ids, labels=labels)
@@ -92,23 +97,21 @@ def inference(args, model, tokenizer):
     test_dataloader = loaders['test']
 
 
-def distributed_setup(args):
+def distributed_setup(args, model):
     '''
     setup distributed training
     '''
     torch.cuda.set_device(args.local_rank)
-    torch.distributed.init_process_group(backend='nccl', init_method='env://')
-    args.world_size = torch.distributed.get_world_size()
-    args.rank = torch.distributed.get_rank()
-
+    torch.distributed.init_process_group(backend='nccl')
+    args.device = torch.device('cuda', args.local_rank)
 
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_name', type=str, default='checkpoints/bert-base-NER', help='model name or path')
-    parser.add_argument('--train_file', type=str, default='./data/train.jsonl', help='path to train file')
-    parser.add_argument('--dev_file', type=str, default='./data/dev.jsonl', help='path to dev file')
+    parser.add_argument('--train_file', type=str, default='./data/train.conll', help='path to train file')
+    parser.add_argument('--dev_file', type=str, default='./data/dev.conll', help='path to dev file')
     parser.add_argument('--test_file', type=str, default='./data/test.conll', help='path to test file')
     parser.add_argument('--batch_size', type=int, default=4)
     parser.add_argument('--max_length', type=int, default=512)
@@ -120,21 +123,26 @@ if __name__ == '__main__':
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--output_dir', type=str, default='../output')
     parser.add_argument('--device', type=str, default='cuda')
-    parser.add_argument('--dataset', type=str, default='scirex')
-    parser.add_argument('--label_num', type=int, default=9, help='number of labels, 15 for conll, 9 for scirex')
+    parser.add_argument('--dataset', type=str, default='conll')
+    parser.add_argument('--label_num', type=int, default=15, help='number of labels, 15 for conll, 9 for scirex')
     parser.add_argument('--train', action='store_true')
     parser.add_argument('--inference', action='store_true')
-    parser.add_argument('--distributed', action='store_true')
+    parser.add_argument('--local_rank', type=int, default=-1)
 
     args = parser.parse_args()
+
+    args.local_rank = os.environ['LOCAL_RANK']
 
 
     tokenizer = AutoTokenizer.from_pretrained(args.model_name)
     model = AutoModelForTokenClassification.from_pretrained(args.model_name, num_labels=args.label_num, ignore_mismatched_sizes=True)
-    model.to(args.device)
+    device = torch.device(args.local_rank) if args.local_rank != -1 else torch.device('cuda')
+    model.to(device)
     
-
-
+    if torch.cuda.device_count() > 1:
+        distributed_setup(args, model)
+        model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.local_rank], output_device=args.local_rank)
+    
 
     if args.train:
         train(args, model, tokenizer)
