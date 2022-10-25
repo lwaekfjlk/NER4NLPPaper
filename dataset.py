@@ -64,7 +64,7 @@ class ConLLDataset(Dataset):
         batch_max_length = max([len(instance['input_ids']) for instance in batch])
 
         if max_length is None:
-            max_length = batch_max_length
+            max_length = batch_max_length + 2
         else:
             max_length = min(max_length, batch_max_length + 2)
 
@@ -160,7 +160,7 @@ class ScirexDataset(Dataset):
         batch_max_length = max([len(instance['input_ids']) for instance in batch])
 
         if max_length is None:
-            max_length = batch_max_length
+            max_length = batch_max_length + 2
         else:
             max_length = min(max_length, batch_max_length+2)
 
