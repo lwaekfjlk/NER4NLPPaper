@@ -14,7 +14,6 @@ from torch.utils.data import DataLoader
 from torch.nn.parallel import DistributedDataParallel as DDP
 
 
-
 def load_dataset(args, tokenizer):
     '''
     loading datasets, return a dictionary of dataloaders
@@ -40,8 +39,6 @@ def load_dataset(args, tokenizer):
             dev_dataloader = DataLoader(dev_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=lambda x: dev_dataset.collate_fn(x, args.max_length))
         loader_dict['train'] = train_dataloader
         loader_dict['dev'] = dev_dataloader
-        loader_dict['train'] = train_dataloader
-        loader_dict['dev'] = dev_dataloader
 
     if args.inference:
         if args.dataset == 'scirex':
@@ -60,8 +57,8 @@ def attach_optimizer(args, model):
     '''
     attach optimizer to the model
     '''
-    if args.optimizer == 'adam':
-        optimizer = torch.optim.Adam(model.parameters(), lr=args.learning_rate)
+    if args.optimizer == 'adamw':
+        optimizer = torch.optim.AdamW(model.parameters(), lr=args.learning_rate)
     else:
         raise ValueError('Invalid optimizer')
 
@@ -117,6 +114,7 @@ def train(args, model, tokenizer):
             input_ids = data['input_ids'].to(args.device)
             labels = data['labels'].to(args.device)
             mask_ids = data['attention_mask'].to(args.device)
+            import pdb; pdb.set_trace()
             outputs = model(input_ids, labels=labels, attention_mask=mask_ids, return_dict=True)
             loss = outputs['loss']
             loss.backward()
@@ -180,11 +178,14 @@ def sciner_inference(args, model, tokenizer):
                 entities.append(entity)
                 ner_index += 1
                 target_index += 1
-                while words[-1] != target_words[target_index-1]:
+                match_word = tokenizer.decode(tokenizer.encode(target_words[target_index-1]), skip_special_tokens=True)
+                match_sub_word = tokenizer.decode(tokenizer.encode(words[-1]), skip_special_tokens=True)
+                while match_sub_word != match_word:
                     sub_word = ner_res[ner_index]['word']
                     words[-1] += sub_word.replace('##', '')
                     ner_index += 1
-                output_f.write(words[-1]+'\t'+entities[-1]+'\n')
+                    match_sub_word = tokenizer.decode(tokenizer.encode(words[-1]), skip_special_tokens=True)
+                output_f.write(target_words[target_index-1]+'\t'+entities[-1]+'\n')
             output_f.write('\n')
     return
 
@@ -201,7 +202,7 @@ def distributed_setup(args, model):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model_name', type=str, default='dslim/bert-base-NER', help='model name or path')
+    parser.add_argument('--model_name', type=str, default='allenai/scibert_scivocab_uncased', help='model name or path')
     parser.add_argument('--train_file', type=str, default='./data/sciner_dataset/train.conll', help='path to train file, jsonl for scirex, conll for sciner')
     parser.add_argument('--dev_file', type=str, default='./data/sciner_dataset/validation.conll', help='path to dev file')
     parser.add_argument('--test_file', type=str, default='./data/sciner_dataset/validation.conll', help='path to test file')
@@ -214,7 +215,7 @@ if __name__ == '__main__':
     parser.add_argument('--max_length', type=int, default=512)
     parser.add_argument('--num_epochs', type=int, default=10)
     parser.add_argument('--learning_rate', type=float, default=1e-5)
-    parser.add_argument('--optimizer', type=str, default='adam')
+    parser.add_argument('--optimizer', type=str, default='adamw')
     parser.add_argument('--weight_decay', type=float, default=0.0)
     parser.add_argument('--warmup_steps', type=int, default=0)
     parser.add_argument('--seed', type=int, default=42)
