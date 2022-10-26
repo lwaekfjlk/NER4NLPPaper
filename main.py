@@ -130,7 +130,9 @@ def train(args, model, tokenizer):
                         best_checkpoint_name = args.checkpoint_save_dir + 'best_model4{}_f1_{}_{}.ckpt'.format(args.task, round(eval_f1*100,3), args.timestamp)
                     else:
                         best_checkpoint_name = args.checkpoint_save_dir + 'best_model4{}_f1_{}_{}.ckpt'.format(args.task, round(eval_f1*100,3), args.timestamp)
-                    torch.save(model.state_dict(), best_checkpoint_name)
+                    model_to_save = model.module if hasattr(model, 'module') else model
+                    output_model_file = best_checkpoint_name
+                    torch.save(model_to_save.state_dict(), output_model_file)
                     best_eval_f1 = eval_f1
         epoch_loss = sum(train_losses) / len(train_losses)
         print(f'Epoch {epoch} loss: {epoch_loss}')
@@ -149,9 +151,14 @@ def test(args, model, tokenizer):
 
 def inference(args, model, tokenizer):
     model.load_state_dict(torch.load(args.checkpoint_save_dir + 'best_model4{}.ckpt'.format(args.task)))
-    nlp = pipeline("ner", model=model, tokenizer=tokenizer)
-    example = 'My name is Clara and I live in Berkeley, California.'
-    ner_results = nlp(example)
+    
+    nlp = pipeline("ner", model=model, tokenizer=tokenizer, device=0)
+    with open(args.inference_file) as f:
+        sents = f.readlines()
+        for sent in sents:
+            ner_results = nlp(sent)
+            for result in ner_results:
+                print(result['entity'])
     import pdb; pdb.set_trace()
     return
 
@@ -172,6 +179,7 @@ if __name__ == '__main__':
     parser.add_argument('--train_file', type=str, default='./data/sciner_dataset/train.conll', help='path to train file, jsonl for scirex, conll for sciner')
     parser.add_argument('--dev_file', type=str, default='./data/sciner_dataset/validation.conll', help='path to dev file')
     parser.add_argument('--test_file', type=str, default='./data/sciner_dataset/validation.conll', help='path to test file')
+    parser.add_argument('--inference_file', type=str, default='./data/anlp_test/anlp-sciner-test.txt', help='final ANLP submission file')
     parser.add_argument('--task', type=str, default='sciner-finetune', choices=['sciner-finetune', 'scirex-finetune'])
     parser.add_argument('--load_from_checkpoint', type=str, default=None, help='contine finetuning based on one checkpoint')
     parser.add_argument('--checkpoint_save_dir', type=str, default='./checkpoints/')
@@ -222,4 +230,4 @@ if __name__ == '__main__':
     if args.train:
         train(args, model, tokenizer)
     elif args.inference:
-        train(args, model, tokenizer)
+        inference(args, model, tokenizer)
