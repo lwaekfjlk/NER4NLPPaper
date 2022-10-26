@@ -14,6 +14,7 @@ from torch.utils.data import DataLoader
 from torch.nn.parallel import DistributedDataParallel as DDP
 
 
+
 def load_dataset(args, tokenizer):
     '''
     loading datasets, return a dictionary of dataloaders
@@ -157,12 +158,39 @@ def sciner_inference(args, model, tokenizer):
         'B-HyperparameterValue', 'I-HyperparameterValue', 'B-MetricName', 'I-MetricName',
         'B-MetricValue', 'I-MetricValue', 'B-TaskName', 'I-TaskName', 'B-DatasetName', 'I-DatasetName'
     ]
-    id2entity = {i: e for i, e in enumerate(entities)}
+
     model.load_state_dict(torch.load(args.checkpoint_save_dir + 'best_model4{}.ckpt'.format(args.task)))
+    id2entity = {i: e for i, e in enumerate(entities)}
     label2id = model.config.label2id
 
-    nlp = pipeline("ner", model=model, tokenizer=tokenizer, device=0)
-    conll_result = []
+    ner_pipeline = pipeline("ner", model=model, tokenizer=tokenizer, device=0)
+    with open(args.output_file, 'w', newline='') as output_f, open(args.inference_file, 'r') as input_f:
+        sents = input_f.readlines()
+        for sent in sents:
+            target_words = sent.strip().split(' ')
+            ner_res = ner_pipeline(sent)
+            words = []
+            entities = []
+            ner_index = 0
+            target_index = 0
+            while ner_index < len(ner_res):
+                sub_word = ner_res[ner_index]['word']
+                sub_word = sub_word.replace('##', '')
+                entity = ner_res[ner_index]['entity']
+                entity = id2entity[label2id[entity]]
+                words.append(sub_word)
+                entities.append(entity)
+                ner_index += 1
+                target_index += 1
+                while words[-1] != target_words[target_index-1]:
+                    sub_word = ner_res[ner_index]['word']
+                    words[-1] += sub_word.replace('##', '')
+                    ner_index += 1
+                output_f.write(words[-1]+'\t'+entities[-1]+'\n')
+            output_f.write('\n') 
+
+
+    '''
     with open(args.inference_file_name, 'w', newline='') as tsvfile, open(args.inference_file, 'r') as inference_f:
         writer = csv.writer(tsvfile, delimiter='\t', lineterminator='\n')
         sents = inference_f.readlines()
@@ -192,7 +220,8 @@ def sciner_inference(args, model, tokenizer):
                 for word, entity in zip(words, entities):
                     writer.writerow([word, entity])
             writer.writerow([])
-    return conll_result
+    '''
+    return
 
 
 def distributed_setup(args, model):
@@ -212,6 +241,7 @@ if __name__ == '__main__':
     parser.add_argument('--dev_file', type=str, default='./data/sciner_dataset/validation.conll', help='path to dev file')
     parser.add_argument('--test_file', type=str, default='./data/sciner_dataset/validation.conll', help='path to test file')
     parser.add_argument('--inference_file', type=str, default='./data/anlp_test/anlp-sciner-test.txt', help='final ANLP submission file')
+    parser.add_argument('--output_file', type=str, default='./data/anlp_test/anlp_haofeiy.conll')
     parser.add_argument('--task', type=str, default='sciner-finetune', choices=['sciner-finetune', 'scirex-finetune'])
     parser.add_argument('--load_from_checkpoint', type=str, default=None, help='contine finetuning based on one checkpoint')
     parser.add_argument('--checkpoint_save_dir', type=str, default='./checkpoints/')
@@ -231,7 +261,6 @@ if __name__ == '__main__':
     parser.add_argument('--local_rank', type=int, default=-1)
     parser.add_argument('--evaluation_steps', type=int, default=50)
     parser.add_argument('--use_wandb', action='store_true')
-    parser.add_argument('--inference_file_name', type=str, default='haofeiy.conll')
 
     args = parser.parse_args()
 
