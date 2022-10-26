@@ -199,7 +199,6 @@ class ScirexDataset(Dataset):
         }
 
 
-
 if __name__ == '__main__':
     from transformers import AutoTokenizer
     from torch.utils.data import DataLoader, SequentialSampler

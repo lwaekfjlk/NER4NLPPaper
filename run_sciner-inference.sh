@@ -8,3 +8,4 @@ python -m torch.distributed.launch --nproc_per_node=$NGPU --master_port 29519 ma
 --dev_file ./data/sciner_dataset/validation.conll \
 --test_file ./data/sciner_dataset/validation.conll \
 --checkpoint_save_dir ./checkpoints/ \
+--inference_file_name ./data/anlp_test/anlp_haofeiy.conll

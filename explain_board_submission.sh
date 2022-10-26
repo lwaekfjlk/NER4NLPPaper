@@ -1,0 +1,12 @@
+python -m explainaboard_client.cli.evaluate_system \
+  --username $EB_USERNAME \
+  --api-key $EB_API_KEY \
+  --task named-entity-recognition \
+  --system-name anlp_andrewid_mysys1 \
+  --dataset cmu_anlp \
+  --sub-dataset sciner \
+  --split test \
+  --system-output-file anlp_haofeiy.conll \
+  --system-output-file-type conll \
+  --shared-users neubig@gmail.com \
+  --source-language en

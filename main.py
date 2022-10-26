@@ -2,17 +2,16 @@ import os
 import torch
 import argparse
 import time
-import wandb
+import csv
 import shutil
 import evaluate
 import torch.distributed as dist
 from tqdm import tqdm
-from transformers import AutoTokenizer, AutoModelForTokenClassification
+from transformers import AutoTokenizer, AutoModelForTokenClassification, AutoConfig
 from transformers import pipeline
 from dataset import ScirexDataset, SciNERDataset
 from torch.utils.data import DataLoader
 from torch.nn.parallel import DistributedDataParallel as DDP
-
 
 
 def load_dataset(args, tokenizer):
@@ -55,6 +54,7 @@ def load_dataset(args, tokenizer):
     
     return loader_dict
 
+
 def attach_optimizer(args, model):
     '''
     attach optimizer to the model
@@ -65,6 +65,7 @@ def attach_optimizer(args, model):
         raise ValueError('Invalid optimizer')
 
     return optimizer
+
 
 def validate(args, dev_dataloader, model):
     correct_ones = 0
@@ -149,18 +150,49 @@ def test(args, model, tokenizer):
     raise NotImplementedError
 
 
-def inference(args, model, tokenizer):
+def sciner_inference(args, model, tokenizer):
+    entities = [
+        'O',
+        'B-MethodName', 'I-MethodName', 'B-HyperparameterName', 'I-HyperparameterName',
+        'B-HyperparameterValue', 'I-HyperparameterValue', 'B-MetricName', 'I-MetricName',
+        'B-MetricValue', 'I-MetricValue', 'B-TaskName', 'I-TaskName', 'B-DatasetName', 'I-DatasetName'
+    ]
+    id2entity = {i: e for i, e in enumerate(entities)}
     model.load_state_dict(torch.load(args.checkpoint_save_dir + 'best_model4{}.ckpt'.format(args.task)))
-    
+    label2id = model.config.label2id
+
     nlp = pipeline("ner", model=model, tokenizer=tokenizer, device=0)
-    with open(args.inference_file) as f:
-        sents = f.readlines()
+    conll_result = []
+    with open(args.inference_file_name, 'w', newline='') as tsvfile, open(args.inference_file, 'r') as inference_f:
+        writer = csv.writer(tsvfile, delimiter='\t', lineterminator='\n')
+        sents = inference_f.readlines()
         for sent in sents:
-            ner_results = nlp(sent)
-            for result in ner_results:
-                print(result['entity'])
-    import pdb; pdb.set_trace()
-    return
+            gth_words = sent.strip().split(' ')
+            gth_words_num = len(gth_words)
+            sub_sents = [' '.join(gth_words[i*50: (i+1)*50]) for i in range(gth_words_num//50+1)]
+            for sub_sent in sub_sents:
+                if sub_sent == '':
+                    continue
+                gth_words = sub_sent.strip().split(' ')
+                ner_results = nlp(sub_sent)
+                words = []
+                entities = []
+                ner_index = 0
+                gth_index = 0
+                while ner_index < len(ner_results):
+                    sub_word = ner_results[ner_index]['word'].replace('##', '')
+                    entity = id2entity[label2id[ner_results[ner_index]['entity']]]
+                    words.append(sub_word)
+                    entities.append(entity)
+                    gth_index += 1
+                    ner_index += 1
+                    while words[-1] != gth_words[gth_index-1]:
+                        words[-1] += ner_results[ner_index]['word'].replace('##', '')
+                        ner_index += 1
+                for word, entity in zip(words, entities):
+                    writer.writerow([word, entity])
+            writer.writerow([])
+    return conll_result
 
 
 def distributed_setup(args, model):
@@ -199,6 +231,7 @@ if __name__ == '__main__':
     parser.add_argument('--local_rank', type=int, default=-1)
     parser.add_argument('--evaluation_steps', type=int, default=50)
     parser.add_argument('--use_wandb', action='store_true')
+    parser.add_argument('--inference_file_name', type=str, default='haofeiy.conll')
 
     args = parser.parse_args()
 
@@ -206,6 +239,7 @@ if __name__ == '__main__':
     args.timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(round(time.time()*1000))/1000))
 
     if args.use_wandb:
+        import wandb
         # need to change to your own API when using
         os.environ['EXP_NUM'] = 'SciNER'
         os.environ['WANDB_NAME'] = time.strftime(
@@ -217,10 +251,12 @@ if __name__ == '__main__':
         wandb.init(project="SciNER")
 
     tokenizer = AutoTokenizer.from_pretrained(args.model_name)
-    model = AutoModelForTokenClassification.from_pretrained(args.model_name, num_labels=args.label_num, ignore_mismatched_sizes=True)
+    config = AutoConfig.from_pretrained(args.model_name, num_labels=args.label_num)
+    model = AutoModelForTokenClassification.from_pretrained(args.model_name, config=config, ignore_mismatched_sizes=True)
+    device = torch.device(args.local_rank) if args.local_rank != -1 else torch.device('cuda')
     if args.load_from_checkpoint:
         model.load_state_dict(torch.load(args.checkpoint_save_dir))
-    device = torch.device(args.local_rank) if args.local_rank != -1 else torch.device('cuda')
+    
     model.to(device)
     
     if torch.cuda.device_count() > 1:
@@ -230,4 +266,4 @@ if __name__ == '__main__':
     if args.train:
         train(args, model, tokenizer)
     elif args.inference:
-        inference(args, model, tokenizer)
+        conll_result = sciner_inference(args, model, tokenizer)
