@@ -146,8 +146,6 @@ def train(args, model, tokenizer):
 
 
 def test(args, model, tokenizer):
-    loaders = load_dataset(args, tokenizer)
-    test_dataloader = loaders['test']
     raise NotImplementedError
 
 
@@ -187,40 +185,7 @@ def sciner_inference(args, model, tokenizer):
                     words[-1] += sub_word.replace('##', '')
                     ner_index += 1
                 output_f.write(words[-1]+'\t'+entities[-1]+'\n')
-            output_f.write('\n') 
-
-
-    '''
-    with open(args.inference_file_name, 'w', newline='') as tsvfile, open(args.inference_file, 'r') as inference_f:
-        writer = csv.writer(tsvfile, delimiter='\t', lineterminator='\n')
-        sents = inference_f.readlines()
-        for sent in sents:
-            gth_words = sent.strip().split(' ')
-            gth_words_num = len(gth_words)
-            sub_sents = [' '.join(gth_words[i*50: (i+1)*50]) for i in range(gth_words_num//50+1)]
-            for sub_sent in sub_sents:
-                if sub_sent == '':
-                    continue
-                gth_words = sub_sent.strip().split(' ')
-                ner_results = nlp(sub_sent)
-                words = []
-                entities = []
-                ner_index = 0
-                gth_index = 0
-                while ner_index < len(ner_results):
-                    sub_word = ner_results[ner_index]['word'].replace('##', '')
-                    entity = id2entity[label2id[ner_results[ner_index]['entity']]]
-                    words.append(sub_word)
-                    entities.append(entity)
-                    gth_index += 1
-                    ner_index += 1
-                    while words[-1] != gth_words[gth_index-1]:
-                        words[-1] += ner_results[ner_index]['word'].replace('##', '')
-                        ner_index += 1
-                for word, entity in zip(words, entities):
-                    writer.writerow([word, entity])
-            writer.writerow([])
-    '''
+            output_f.write('\n')
     return
 
 
@@ -284,7 +249,10 @@ if __name__ == '__main__':
     model = AutoModelForTokenClassification.from_pretrained(args.model_name, config=config, ignore_mismatched_sizes=True)
     device = torch.device(args.local_rank) if args.local_rank != -1 else torch.device('cuda')
     if args.load_from_checkpoint:
-        model.load_state_dict(torch.load(args.checkpoint_save_dir))
+        model_dict = torch.load(args.load_from_checkpoint)
+        filtered_model_dict = {k: v for k, v in model_dict.items() if 'classifier' not in k}
+        model_dict.update(filtered_model_dict)
+        model.load_state_dict(filtered_model_dict, strict=False)
     
     model.to(device)
     
