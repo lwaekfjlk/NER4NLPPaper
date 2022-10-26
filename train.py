@@ -109,6 +109,15 @@ def distributed_setup(args, model):
 
 
 if __name__ == '__main__':
+    os.environ['EXP_NUM'] = 'SciNER'
+    os.environ['WANDB_NAME'] = time.strftime(
+        '%Y-%m-%d %H:%M:%S', 
+        time.localtime(int(round(time.time()*1000))/1000)
+    )
+    os.environ['WANDB_API_KEY'] = '972035264241fb0f6cc3cab51a5d82f47ca713db'
+    os.environ['WANDB_DIR'] = './SciNER_tmp'
+    wandb.init(project="SciNER")
+
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_name', type=str, default='dslim/bert-base-NER', help='model name or path')
     parser.add_argument('--train_file', type=str, default='./data/train.jsonl', help='path to train file, jsonl for scirex, conll for conll')

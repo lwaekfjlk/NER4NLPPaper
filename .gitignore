@@ -5,7 +5,7 @@ __pycache__/
 
 # C extensions
 *.so
-
+SciNER_tmp/
 # Distribution / packaging
 .Python
 build/
