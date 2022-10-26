@@ -4,7 +4,7 @@ import torch
 from torch.utils.data import Dataset
 
 
-class ConLLDataset(Dataset):
+class SciNERDataset(Dataset):
     entities = [
         'O',
         'B-MethodName', 'I-MethodName', 'B-HyperparameterName', 'I-HyperparameterName',

@@ -3,12 +3,13 @@ import torch
 import argparse
 import time
 import wandb
+import shutil
 import evaluate
 import torch.distributed as dist
 from tqdm import tqdm
 from transformers import AutoTokenizer, AutoModelForTokenClassification
 from transformers import pipeline
-from dataset import ScirexDataset, ConLLDataset
+from dataset import ScirexDataset, SciNERDataset
 from torch.utils.data import DataLoader
 from torch.nn.parallel import DistributedDataParallel as DDP
 
@@ -24,9 +25,9 @@ def load_dataset(args, tokenizer):
         if args.dataset == 'scirex':
             train_dataset = ScirexDataset(args.train_file, tokenizer)
             dev_dataset = ScirexDataset(args.dev_file, tokenizer)
-        elif args.dataset == 'conll':
-            train_dataset = ConLLDataset(args.train_file, tokenizer)
-            dev_dataset = ConLLDataset(args.dev_file, tokenizer)
+        elif args.dataset == 'sciner':
+            train_dataset = SciNERDataset(args.train_file, tokenizer)
+            dev_dataset = SciNERDataset(args.dev_file, tokenizer)
         else:
             raise ValueError('Invalid dataset')
         if torch.cuda.device_count() > 1:
@@ -45,8 +46,8 @@ def load_dataset(args, tokenizer):
     if args.inference:
         if args.dataset == 'scirex':
             test_dataset = ScirexDataset(args.test_file, tokenizer)
-        elif args.dataset == 'conll':
-            test_dataset = ConLLDataset(args.test_file, tokenizer)
+        elif args.dataset == 'sciner':
+            test_dataset = SciNERDataset(args.test_file, tokenizer)
         else:
             raise ValueError('Invalid dataset')
         test_dataloader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=test_dataset.collate_fn)
@@ -97,6 +98,7 @@ def validate(args, dev_dataloader, model):
 
 
 def train(args, model, tokenizer):
+    best_checkpoint_name = None
     best_eval_f1 = -1
     global_step = 0
     print('=====begin loading dataset====')
@@ -109,7 +111,7 @@ def train(args, model, tokenizer):
 
     train_losses = []
     for epoch in range(args.num_epochs):
-        for data in train_dataloader:
+        for data in tqdm(train_dataloader):
             input_ids = data['input_ids'].to(args.device)
             labels = data['labels'].to(args.device)
             mask_ids = data['attention_mask'].to(args.device)
@@ -123,17 +125,35 @@ def train(args, model, tokenizer):
             if global_step % args.evaluation_steps == 0:
                 eval_f1, eval_loss = validate(args, dev_dataloader, model)
                 if eval_f1 > best_eval_f1:
-                    if os.path.exists('./checkpoints/best_NER_model_f1_{}.ckpt'.format(round(best_eval_f1*100, 3))):
-                        os.remove('./checkpoints/best_NER_model_f1_{}.ckpt'.format(round(best_eval_f1*100, 3)))
-                    torch.save(model.state_dict(), './checkpoints/best_NER_model_f1_{}.ckpt'.format(round(eval_f1*100,3)))
+                    if best_checkpoint_name is not None:
+                        os.remove(best_checkpoint_name)
+                        best_checkpoint_name = args.checkpoint_save_dir + 'best_model4{}_f1_{}_{}.ckpt'.format(args.task, round(eval_f1*100,3), args.timestamp)
+                    else:
+                        best_checkpoint_name = args.checkpoint_save_dir + 'best_model4{}_f1_{}_{}.ckpt'.format(args.task, round(eval_f1*100,3), args.timestamp)
+                    torch.save(model.state_dict(), best_checkpoint_name)
                     best_eval_f1 = eval_f1
         epoch_loss = sum(train_losses) / len(train_losses)
         print(f'Epoch {epoch} loss: {epoch_loss}')
+
+    src_file = best_checkpoint_name
+    tgt_file = args.checkpoint_save_dir + 'best_model4{}.ckpt'.format(args.task)
+    shutil.copy(src_file, tgt_file)
+    return
 
 
 def test(args, model, tokenizer):
     loaders = load_dataset(args, tokenizer)
     test_dataloader = loaders['test']
+    raise NotImplementedError
+
+
+def inference(args, model, tokenizer):
+    model.load_state_dict(torch.load(args.checkpoint_save_dir + 'best_model4{}.ckpt'.format(args.task)))
+    nlp = pipeline("ner", model=model, tokenizer=tokenizer)
+    example = 'My name is Clara and I live in Berkeley, California.'
+    ner_results = nlp(example)
+    import pdb; pdb.set_trace()
+    return
 
 
 def distributed_setup(args, model):
@@ -149,9 +169,12 @@ def distributed_setup(args, model):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_name', type=str, default='dslim/bert-base-NER', help='model name or path')
-    parser.add_argument('--train_file', type=str, default='./data/conll_dataset/train.conll', help='path to train file, jsonl for scirex, conll for conll')
-    parser.add_argument('--dev_file', type=str, default='./data/conll_dataset/validation.conll', help='path to dev file')
-    parser.add_argument('--test_file', type=str, default='./data/conll_dataset/validation.conll', help='path to test file')
+    parser.add_argument('--train_file', type=str, default='./data/sciner_dataset/train.conll', help='path to train file, jsonl for scirex, conll for sciner')
+    parser.add_argument('--dev_file', type=str, default='./data/sciner_dataset/validation.conll', help='path to dev file')
+    parser.add_argument('--test_file', type=str, default='./data/sciner_dataset/validation.conll', help='path to test file')
+    parser.add_argument('--task', type=str, default='sciner-finetune', choices=['sciner-finetune', 'scirex-finetune'])
+    parser.add_argument('--load_from_checkpoint', type=str, default=None, help='contine finetuning based on one checkpoint')
+    parser.add_argument('--checkpoint_save_dir', type=str, default='./checkpoints/')
     parser.add_argument('--batch_size', type=int, default=4)
     parser.add_argument('--max_length', type=int, default=512)
     parser.add_argument('--num_epochs', type=int, default=10)
@@ -160,10 +183,9 @@ if __name__ == '__main__':
     parser.add_argument('--weight_decay', type=float, default=0.0)
     parser.add_argument('--warmup_steps', type=int, default=0)
     parser.add_argument('--seed', type=int, default=42)
-    parser.add_argument('--output_dir', type=str, default='../output')
     parser.add_argument('--device', type=str, default='cuda')
-    parser.add_argument('--dataset', type=str, default='conll')
-    parser.add_argument('--label_num', type=int, default=15, help='number of labels, 15 for conll, 9 for scirex')
+    parser.add_argument('--dataset', type=str, default='sciner')
+    parser.add_argument('--label_num', type=int, default=15, help='number of labels, 15 for sciner, 9 for scirex')
     parser.add_argument('--train', action='store_true')
     parser.add_argument('--inference', action='store_true')
     parser.add_argument('--local_rank', type=int, default=-1)
@@ -173,6 +195,7 @@ if __name__ == '__main__':
     args = parser.parse_args()
 
     args.local_rank = int(os.environ['LOCAL_RANK'])
+    args.timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(round(time.time()*1000))/1000))
 
     if args.use_wandb:
         # need to change to your own API when using
@@ -185,22 +208,18 @@ if __name__ == '__main__':
         os.environ['WANDB_DIR'] = './SciNER_tmp'
         wandb.init(project="SciNER")
 
-
     tokenizer = AutoTokenizer.from_pretrained(args.model_name)
     model = AutoModelForTokenClassification.from_pretrained(args.model_name, num_labels=args.label_num, ignore_mismatched_sizes=True)
+    if args.load_from_checkpoint:
+        model.load_state_dict(torch.load(args.checkpoint_save_dir))
     device = torch.device(args.local_rank) if args.local_rank != -1 else torch.device('cuda')
     model.to(device)
     
     if torch.cuda.device_count() > 1:
         distributed_setup(args, model)
         model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.local_rank], output_device=args.local_rank)
-    
 
     if args.train:
         train(args, model, tokenizer)
-
-
-    # nlp = pipeline("ner", model=model, tokenizer=tokenizer)
-    # example = 'My name is Clara and I live in Berkeley, California.'
-
-    # ner_results = nlp(example)
+    elif args.inference:
+        train(args, model, tokenizer)
