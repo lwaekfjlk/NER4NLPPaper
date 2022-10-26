@@ -72,7 +72,9 @@ def validate(args, dev_dataloader, model):
 
 
 def train(args, model, tokenizer):
+    print('=====begin loading and tokenizing dataset====')
     loaders = load_dataset(args, tokenizer)
+    print('=====end loading and tokenizing dataset====')
     train_dataloader = loaders['train']
     dev_dataloader = loaders['dev']
     model.train()
@@ -108,7 +110,7 @@ def distributed_setup(args, model):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
-    parser.add_argument('--model_name', type=str, default='checkpoints/bert-base-NER', help='model name or path')
+    parser.add_argument('--model_name', type=str, default='dslim/bert-base-NER', help='model name or path')
     parser.add_argument('--train_file', type=str, default='./data/train.jsonl', help='path to train file, jsonl for scirex, conll for conll')
     parser.add_argument('--dev_file', type=str, default='./data/dev.jsonl', help='path to dev file')
     parser.add_argument('--test_file', type=str, default='./data/test.conll', help='path to test file')
@@ -144,6 +146,7 @@ if __name__ == '__main__':
     
 
     if args.train:
+        print('hello')
         train(args, model, tokenizer)
 
 
