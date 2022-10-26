@@ -1,14 +1,18 @@
-from transformers import AutoTokenizer, AutoModelForTokenClassification
-from transformers import pipeline
+import os
 import torch
 import argparse
+import time
+import wandb
+import evaluate
+import torch.distributed as dist
+from tqdm import tqdm
+from transformers import AutoTokenizer, AutoModelForTokenClassification
+from transformers import pipeline
 from dataset import ScirexDataset, ConLLDataset
 from torch.utils.data import DataLoader
-from tqdm import tqdm
 from torch.nn.parallel import DistributedDataParallel as DDP
-import torch.distributed as dist
 
-import os
+
 
 def load_dataset(args, tokenizer):
     '''
@@ -62,38 +66,72 @@ def attach_optimizer(args, model):
     return optimizer
 
 def validate(args, dev_dataloader, model):
-    for data in tqdm(dev_dataloader):
+    correct_ones = 0
+    all_ones = 0
+    eval_losses = []
+    gth_labels = []
+    pred_labels = []
+    for data in dev_dataloader:
         input_ids = data['input_ids'].to(args.device)
         labels = data['labels'].to(args.device)
-        mask_ids = data[['attention_mask']].to(args.device)
+        mask_ids = data['attention_mask'].to(args.device)
         outputs = model(input_ids, labels=labels, attention_mask=mask_ids)
-        loss = outputs[0]
-        print(f'Validation loss: {loss}')
+        eval_loss = outputs['loss']
+        logits = outputs['logits']
+        predictions = torch.argmax(logits, dim=-1)
+        pred_labels += predictions.view(-1).tolist()
+        gth_labels += labels.view(-1).tolist()
+        eval_losses.append(eval_loss.item()) 
+    f1_metric = evaluate.load("f1")
+    results = f1_metric.compute(
+        predictions=pred_labels, 
+        references=gth_labels, 
+        labels=[i for i in range(args.label_num)],
+        average='weighted',
+    )
+    f1 = results['f1']
+    print(f'validation f1 : {f1}')
+    eval_loss = sum(eval_losses) / len(eval_losses)
+    print(f'validation loss : {eval_loss}')
+    return f1, eval_loss
 
 
 def train(args, model, tokenizer):
-    print('=====begin loading and tokenizing dataset====')
+    best_eval_f1 = -1
+    global_step = 0
+    print('=====begin loading dataset====')
     loaders = load_dataset(args, tokenizer)
-    print('=====end loading and tokenizing dataset====')
+    print('=====end loading dataset====')
     train_dataloader = loaders['train']
     dev_dataloader = loaders['dev']
     model.train()
     optimizer = attach_optimizer(args, model)
 
-    for epoch in tqdm(range(args.num_epochs)):
-        for data in tqdm(train_dataloader):
+    train_losses = []
+    for epoch in range(args.num_epochs):
+        for data in train_dataloader:
             input_ids = data['input_ids'].to(args.device)
             labels = data['labels'].to(args.device)
             mask_ids = data['attention_mask'].to(args.device)
-            outputs = model(input_ids, labels=labels, attention_mask=mask_ids)
-            loss = outputs[0]
+            outputs = model(input_ids, labels=labels, attention_mask=mask_ids, return_dict=True)
+            loss = outputs['loss']
             loss.backward()
+            train_losses.append(loss.item())
             optimizer.step()
             optimizer.zero_grad()
-        print(f'Epoch {epoch} loss: {loss}')
+            global_step += 1
+            if global_step % args.evaluation_steps == 0:
+                eval_f1, eval_loss = validate(args, dev_dataloader, model)
+                if eval_f1 > best_eval_f1:
+                    if os.path.exists('./checkpoints/best_NER_model_f1_{}.ckpt'.format(round(best_eval_f1*100, 3))):
+                        os.remove('./checkpoints/best_NER_model_f1_{}.ckpt'.format(round(best_eval_f1*100, 3)))
+                    torch.save(model.state_dict(), './checkpoints/best_NER_model_f1_{}.ckpt'.format(round(eval_f1*100,3)))
+                    best_eval_f1 = eval_f1
+        epoch_loss = sum(train_losses) / len(train_losses)
+        print(f'Epoch {epoch} loss: {epoch_loss}')
 
 
-def inference(args, model, tokenizer):
+def test(args, model, tokenizer):
     loaders = load_dataset(args, tokenizer)
     test_dataloader = loaders['test']
 
@@ -109,20 +147,11 @@ def distributed_setup(args, model):
 
 
 if __name__ == '__main__':
-    os.environ['EXP_NUM'] = 'SciNER'
-    os.environ['WANDB_NAME'] = time.strftime(
-        '%Y-%m-%d %H:%M:%S', 
-        time.localtime(int(round(time.time()*1000))/1000)
-    )
-    os.environ['WANDB_API_KEY'] = '972035264241fb0f6cc3cab51a5d82f47ca713db'
-    os.environ['WANDB_DIR'] = './SciNER_tmp'
-    wandb.init(project="SciNER")
-
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_name', type=str, default='dslim/bert-base-NER', help='model name or path')
-    parser.add_argument('--train_file', type=str, default='./data/train.jsonl', help='path to train file, jsonl for scirex, conll for conll')
-    parser.add_argument('--dev_file', type=str, default='./data/dev.jsonl', help='path to dev file')
-    parser.add_argument('--test_file', type=str, default='./data/test.conll', help='path to test file')
+    parser.add_argument('--train_file', type=str, default='./data/conll_dataset/train.conll', help='path to train file, jsonl for scirex, conll for conll')
+    parser.add_argument('--dev_file', type=str, default='./data/conll_dataset/validation.conll', help='path to dev file')
+    parser.add_argument('--test_file', type=str, default='./data/conll_dataset/validation.conll', help='path to test file')
     parser.add_argument('--batch_size', type=int, default=4)
     parser.add_argument('--max_length', type=int, default=512)
     parser.add_argument('--num_epochs', type=int, default=10)
@@ -133,15 +162,28 @@ if __name__ == '__main__':
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--output_dir', type=str, default='../output')
     parser.add_argument('--device', type=str, default='cuda')
-    parser.add_argument('--dataset', type=str, default='scirex')
-    parser.add_argument('--label_num', type=int, default=9, help='number of labels, 15 for conll, 9 for scirex')
+    parser.add_argument('--dataset', type=str, default='conll')
+    parser.add_argument('--label_num', type=int, default=15, help='number of labels, 15 for conll, 9 for scirex')
     parser.add_argument('--train', action='store_true')
     parser.add_argument('--inference', action='store_true')
     parser.add_argument('--local_rank', type=int, default=-1)
+    parser.add_argument('--evaluation_steps', type=int, default=50)
+    parser.add_argument('--use_wandb', action='store_true')
 
     args = parser.parse_args()
 
     args.local_rank = int(os.environ['LOCAL_RANK'])
+
+    if args.use_wandb:
+        # need to change to your own API when using
+        os.environ['EXP_NUM'] = 'SciNER'
+        os.environ['WANDB_NAME'] = time.strftime(
+            '%Y-%m-%d %H:%M:%S', 
+            time.localtime(int(round(time.time()*1000))/1000)
+        )
+        os.environ['WANDB_API_KEY'] = '972035264241fb0f6cc3cab51a5d82f47ca713db'
+        os.environ['WANDB_DIR'] = './SciNER_tmp'
+        wandb.init(project="SciNER")
 
 
     tokenizer = AutoTokenizer.from_pretrained(args.model_name)
@@ -155,7 +197,6 @@ if __name__ == '__main__':
     
 
     if args.train:
-        print('hello')
         train(args, model, tokenizer)
 
 
