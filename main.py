@@ -66,6 +66,12 @@ def attach_optimizer(args, model):
 
 
 def validate(args, dev_dataloader, model):
+    label_list = [
+        'O',
+        'B-MethodName', 'I-MethodName', 'B-HyperparameterName', 'I-HyperparameterName',
+        'B-HyperparameterValue', 'I-HyperparameterValue', 'B-MetricName', 'I-MetricName',
+        'B-MetricValue', 'I-MetricValue', 'B-TaskName', 'I-TaskName', 'B-DatasetName', 'I-DatasetName'
+    ]
     correct_ones = 0
     all_ones = 0
     eval_losses = []
@@ -79,17 +85,21 @@ def validate(args, dev_dataloader, model):
         eval_loss = outputs['loss']
         logits = outputs['logits']
         predictions = torch.argmax(logits, dim=-1)
-        pred_labels += predictions.view(-1).tolist()
-        gth_labels += labels.view(-1).tolist()
+        pred_labels.append(predictions.view(-1).tolist())
+        gth_labels.append(labels.view(-1).tolist())
         eval_losses.append(eval_loss.item()) 
-    f1_metric = evaluate.load("f1")
-    results = f1_metric.compute(
-        predictions=pred_labels, 
-        references=gth_labels, 
-        labels=[i for i in range(args.label_num)],
-        average='weighted',
-    )
-    f1 = results['f1']
+    metric = evaluate.load("seqeval")
+    true_predictions = [
+        [label_list[p] for (p, l) in zip(pred_label, gth_label) if l != -100]
+        for pred_label, gth_label in zip(pred_labels, gth_labels)
+    ]
+    true_labels = [
+        [label_list[l] for (p, l) in zip(pred_label, gth_label) if l != -100]
+        for pred_label, gth_label in zip(pred_labels, gth_labels)
+    ]
+    results = metric.compute(predictions=true_predictions, references=true_labels)
+    f1 = results['overall_f1']
+
     print(f'validation f1 : {f1}')
     eval_loss = sum(eval_losses) / len(eval_losses)
     print(f'validation loss : {eval_loss}')
@@ -114,7 +124,6 @@ def train(args, model, tokenizer):
             input_ids = data['input_ids'].to(args.device)
             labels = data['labels'].to(args.device)
             mask_ids = data['attention_mask'].to(args.device)
-            import pdb; pdb.set_trace()
             outputs = model(input_ids, labels=labels, attention_mask=mask_ids, return_dict=True)
             loss = outputs['loss']
             loss.backward()

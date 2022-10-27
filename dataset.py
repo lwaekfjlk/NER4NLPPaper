@@ -48,7 +48,10 @@ class SciNERDataset(Dataset):
             token, tag = line.split(sep)[0], line.split(sep)[1]
             token_ids = self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(token))
             label = self.entity2id[tag]
-            labels = [label for _ in range(len(token_ids))]
+            if len(token_ids) == 1:
+                labels = [label]
+            else:
+                labels = [label] + [-100 for _ in range(len(token_ids)-1)]
             example['input_ids'] += token_ids
             example['labels'] += labels
 
