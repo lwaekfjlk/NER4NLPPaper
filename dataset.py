@@ -154,7 +154,10 @@ class ScirexDataset(Dataset):
                                                      scirex_document['ner'][ner_i][1], \
                                                      scirex_document['ner'][ner_i][2]
                 instance['input_ids'] += token_ids
-                instance['labels'] += [self.entity2id[tag] for _ in range(len(token_ids))]
+                if len(token_ids) == 1:
+                    instance['labels'] += [self.entity2id[tag]]
+                else:
+                    instance['labels'] += [self.entity2id[tag]] + [-100 for _ in range(len(token_ids)-1)]
 
             res.append(instance)
         return res
