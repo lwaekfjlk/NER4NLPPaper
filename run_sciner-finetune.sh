@@ -9,7 +9,8 @@ python -m torch.distributed.launch --nproc_per_node=$NGPU --master_port 29519 ma
 --test_file ./data/sciner_dataset/validation.conll \
 --checkpoint_save_dir ./checkpoints/ \
 --task sciner-finetune \
---batch_size 8 \
+--train_batch_size 8 \
+--dev_batch_size 8 \
 --max_length 512 \
 --num_epochs 30 \
 --learning_rate 1e-5 \

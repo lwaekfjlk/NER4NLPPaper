@@ -32,11 +32,11 @@ def load_dataset(args, tokenizer):
         if torch.cuda.device_count() > 1:
             train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset, num_replicas=dist.get_world_size(), rank=dist.get_rank(), shuffle=True)
             dev_sampler = torch.utils.data.distributed.DistributedSampler(dev_dataset, num_replicas=dist.get_world_size(), rank=dist.get_rank(), shuffle=True)
-            train_dataloader = DataLoader(train_dataset, batch_size=args.batch_size, sampler=train_sampler, collate_fn=lambda x: train_dataset.collate_fn(x, args.max_length))
-            dev_dataloader = DataLoader(dev_dataset, batch_size=args.batch_size, sampler=dev_sampler, collate_fn=lambda x: dev_dataset.collate_fn(x, args.max_length))
+            train_dataloader = DataLoader(train_dataset, batch_size=args.train_batch_size, sampler=train_sampler, collate_fn=lambda x: train_dataset.collate_fn(x, args.max_length))
+            dev_dataloader = DataLoader(dev_dataset, batch_size=args.dev_batch_size, sampler=dev_sampler, collate_fn=lambda x: dev_dataset.collate_fn(x, args.max_length))
         else:
-            train_dataloader = DataLoader(train_dataset,  batch_size=args.batch_size, shuffle=True, collate_fn=lambda x: train_dataset.collate_fn(x, args.max_length))
-            dev_dataloader = DataLoader(dev_dataset, batch_size=args.batch_size, shuffle=True, collate_fn=lambda x: dev_dataset.collate_fn(x, args.max_length))
+            train_dataloader = DataLoader(train_dataset,  batch_size=args.train_batch_size, shuffle=True, collate_fn=lambda x: train_dataset.collate_fn(x, args.max_length))
+            dev_dataloader = DataLoader(dev_dataset, batch_size=args.dev_batch_size, shuffle=True, collate_fn=lambda x: dev_dataset.collate_fn(x, args.max_length))
         loader_dict['train'] = train_dataloader
         loader_dict['dev'] = dev_dataloader
 
@@ -47,7 +47,7 @@ def load_dataset(args, tokenizer):
             test_dataset = SciNERDataset(args.test_file, tokenizer)
         else:
             raise ValueError('Invalid dataset')
-        test_dataloader = DataLoader(test_dataset, batch_size=args.batch_size, shuffle=False, collate_fn=test_dataset.collate_fn)
+        test_dataloader = DataLoader(test_dataset, batch_size=args.test_batch_size, shuffle=False, collate_fn=test_dataset.collate_fn)
         loader_dict['test'] = test_dataloader
     
     return loader_dict
@@ -220,7 +220,9 @@ if __name__ == '__main__':
     parser.add_argument('--task', type=str, default='sciner-finetune', choices=['sciner-finetune', 'scirex-finetune'])
     parser.add_argument('--load_from_checkpoint', type=str, default=None, help='contine finetuning based on one checkpoint')
     parser.add_argument('--checkpoint_save_dir', type=str, default='./checkpoints/')
-    parser.add_argument('--batch_size', type=int, default=4)
+    parser.add_argument('--train_batch_size', type=int, default=4)
+    parser.add_argument('--dev_batch_size', type=int, default=4)
+    parser.add_argument('--test_batch_size', type=int, default=4)
     parser.add_argument('--max_length', type=int, default=512)
     parser.add_argument('--num_epochs', type=int, default=10)
     parser.add_argument('--learning_rate', type=float, default=1e-5)

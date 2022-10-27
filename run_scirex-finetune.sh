@@ -9,7 +9,8 @@ python -m torch.distributed.launch --nproc_per_node=$NGPU --master_port 29519 ma
 --test_file ./data/scirex_dataset/test.jsonl \
 --checkpoint_save_dir ./checkpoints/ \
 --task scirex-finetune \
---batch_size 8 \
+--train_batch_size 24 \
+--dev_batch_size 6 \
 --max_length 512 \
 --num_epochs 10 \
 --learning_rate 1e-5 \
