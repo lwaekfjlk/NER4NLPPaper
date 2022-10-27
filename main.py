@@ -212,12 +212,11 @@ def distributed_setup(args, model):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_name', type=str, default='allenai/scibert_scivocab_uncased', help='model name or path')
-    #parser.add_argument('--model_name', type=str, default='KISTI-AI/scideberta', help='model name or path')
     parser.add_argument('--train_file', type=str, default='./data/sciner_dataset/train.conll', help='path to train file, jsonl for scirex, conll for sciner')
     parser.add_argument('--dev_file', type=str, default='./data/sciner_dataset/validation.conll', help='path to dev file')
     parser.add_argument('--test_file', type=str, default='./data/sciner_dataset/validation.conll', help='path to test file')
     parser.add_argument('--inference_file', type=str, default='./data/anlp_test/anlp-sciner-test.txt', help='final ANLP submission file')
-    parser.add_argument('--output_file', type=str, default='./data/anlp_test/anlp_haofeiy.conll')
+    parser.add_argument('--output_file', type=str, default='./data/anlp_test/anlp_haofeiy_sciner.conll')
     parser.add_argument('--task', type=str, default='sciner-finetune', choices=['sciner-finetune', 'scirex-finetune'])
     parser.add_argument('--load_from_checkpoint', type=str, default=None, help='contine finetuning based on one checkpoint')
     parser.add_argument('--checkpoint_save_dir', type=str, default='./checkpoints/')

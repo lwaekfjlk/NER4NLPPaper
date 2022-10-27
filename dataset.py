@@ -158,7 +158,6 @@ class ScirexDataset(Dataset):
                     instance['labels'] += [self.entity2id[tag]]
                 else:
                     instance['labels'] += [self.entity2id[tag]] + [-100 for _ in range(len(token_ids)-1)]
-
             res.append(instance)
         return res
 
