@@ -212,6 +212,7 @@ def distributed_setup(args, model):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_name', type=str, default='allenai/scibert_scivocab_uncased', help='model name or path')
+    #parser.add_argument('--model_name', type=str, default='KISTI-AI/scideberta', help='model name or path')
     parser.add_argument('--train_file', type=str, default='./data/sciner_dataset/train.conll', help='path to train file, jsonl for scirex, conll for sciner')
     parser.add_argument('--dev_file', type=str, default='./data/sciner_dataset/validation.conll', help='path to dev file')
     parser.add_argument('--test_file', type=str, default='./data/sciner_dataset/validation.conll', help='path to test file')
