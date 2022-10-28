@@ -127,6 +127,7 @@ def train(args, model, tokenizer):
     best_checkpoint_name = None
     best_eval_f1 = -1
     global_step = 0
+    step = 0
     print('=====begin loading dataset====')
     loaders = load_dataset(args, tokenizer)
     print('=====end loading dataset====')
@@ -147,12 +148,15 @@ def train(args, model, tokenizer):
             loss = outputs['loss']
             loss.backward()
             train_losses.append(loss.item())
-            optimizer.step()
-            optimizer.zero_grad()
-            scheduler.step()
+            step += 1
+            if step % args.gradient_accumulation_step == 0:
+                global_step += 1
+                optimizer.step()
+                optimizer.zero_grad()
+                scheduler.step()
             if args.use_wandb:
                 wandb.log({'learning rate': scheduler.get_last_lr()[0], 'step': global_step})
-            global_step += 1
+
             if global_step % args.evaluation_steps == 0:
                 eval_f1, eval_loss = validate(args, dev_dataloader, model)
                 if args.use_wandb:
@@ -233,7 +237,6 @@ def distributed_setup(args, model):
     args.device = torch.device('cuda', args.local_rank)
 
 
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--model_name', type=str, default='allenai/scibert_scivocab_uncased', help='model name or path')
@@ -246,6 +249,7 @@ if __name__ == '__main__':
     parser.add_argument('--load_from_checkpoint', type=str, default=None, help='contine finetuning based on one checkpoint')
     parser.add_argument('--checkpoint_save_dir', type=str, default='./checkpoints/')
     parser.add_argument('--train_batch_size', type=int, default=4)
+    parser.add_argument('--gradient_accumulation_step', type=int, default=4)
     parser.add_argument('--dev_batch_size', type=int, default=4)
     parser.add_argument('--test_batch_size', type=int, default=4)
     parser.add_argument('--max_length', type=int, default=512)
