@@ -83,7 +83,7 @@ def attach_scheduler(args, optimizer, total_training_steps):
 
 
 
-def validate(args, dev_dataloader, model):
+def validate(args, dev_dataloader, model, crf_model):
     label_list = [
         'O',
         'B-MethodName', 'I-MethodName', 'B-HyperparameterName', 'I-HyperparameterName',
@@ -100,11 +100,28 @@ def validate(args, dev_dataloader, model):
         labels = data['labels'].to(args.device)
         mask_ids = data['attention_mask'].to(args.device)
         outputs = model(input_ids, labels=labels, attention_mask=mask_ids)
-        eval_loss = outputs['loss']
-        logits = outputs['logits']
-        predictions = torch.argmax(logits, dim=-1)
-        pred_labels.append(predictions.view(-1).tolist())
-        gth_labels.append(labels.view(-1).tolist())
+        if args.with_crf:
+            crf_emissions = outputs['logits'][:, 1:].contiguous()
+            crf_tags = labels[:, 1:].contiguous()
+            crf_tags[crf_tags==-100] = 0
+            crf_mask = mask_ids[:, 1:].contiguous().byte()
+            eval_loss = crf_model.forward(crf_emissions, crf_tags, mask=crf_mask)
+            decoded_results = crf_model.decode(crf_emissions, mask=crf_mask)
+            predictions = []
+            for result in decoded_results:
+                predictions += result
+            references = labels.view(-1).tolist()
+            references = [label for label in references if label != -100]
+            import pdb; pdb.set_trace()
+            pred_labels.append(predictions)
+            gth_labels.append(references)
+        else:
+            eval_loss = outputs['loss']
+            logits = outputs['logits']
+            predictions = torch.argmax(logits, dim=-1)
+            pred_labels.append(predictions.view(-1).tolist())
+            gth_labels.append(labels.view(-1).tolist())
+
         eval_losses.append(eval_loss.item()) 
     metric = evaluate.load("seqeval")
     true_predictions = [
@@ -124,7 +141,7 @@ def validate(args, dev_dataloader, model):
     return f1, eval_loss
 
 
-def train(args, model, tokenizer):
+def train(args, model, crf_model, tokenizer):
     best_checkpoint_name = None
     best_eval_f1 = -float('inf')
     best_eval_loss = float('inf')
@@ -139,8 +156,6 @@ def train(args, model, tokenizer):
     optimizer = attach_optimizer(args, model)
     total_training_steps = len(train_dataloader) * args.num_epochs
     scheduler = attach_scheduler(args, optimizer, total_training_steps)
-    if args.with_crf:
-        crf_model = CRF(args.label_num, batch_first=True).to(args.device)
 
     train_losses = []
     for epoch in range(args.num_epochs):
@@ -169,7 +184,7 @@ def train(args, model, tokenizer):
                 wandb.log({'learning rate': scheduler.get_last_lr()[0], 'step': global_step})
 
             if global_step % args.evaluation_steps == 0:
-                eval_f1, eval_loss = validate(args, dev_dataloader, model)
+                eval_f1, eval_loss = validate(args, dev_dataloader, model, crf_model)
                 if args.use_wandb:
                     wandb.log({'eval_f1': eval_f1, 'step': global_step})
                     wandb.log({'eval_loss': eval_loss, 'step': global_step})
@@ -226,6 +241,9 @@ def sciner_inference(args, model, tokenizer):
     with open(args.output_file, 'w', newline='') as output_f, open(args.inference_file, 'r') as input_f:
         sents = input_f.readlines()
         for sent in sents:
+            tokenized_sent = tokenizer.encode(sent)
+            outputs = model(input_ids=tokenized_sent)
+            import pdb; pdb.set_trace()
             target_words = sent.strip().split(' ')
             ner_res = ner_pipeline(sent)
             words = []
@@ -316,6 +334,10 @@ if __name__ == '__main__':
     tokenizer = AutoTokenizer.from_pretrained(args.model_name)
     config = AutoConfig.from_pretrained(args.model_name, num_labels=args.label_num)
     model = AutoModelForTokenClassification.from_pretrained(args.model_name, config=config, ignore_mismatched_sizes=True)
+    if args.with_crf:
+        crf_model = CRF(args.label_num, batch_first=True).to(args.device)
+    else:
+        crf_model = None
     device = torch.device(args.local_rank) if args.local_rank != -1 else torch.device('cuda')
     if args.load_from_checkpoint:
         model_dict = torch.load(args.load_from_checkpoint)
@@ -330,6 +352,6 @@ if __name__ == '__main__':
         model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.local_rank], output_device=args.local_rank)
 
     if args.train:
-        train(args, model, tokenizer)
+        train(args, model, crf_model, tokenizer)
     elif args.inference:
-        conll_result = sciner_inference(args, model, tokenizer)
+        conll_result = sciner_inference(args, model, crf_model, tokenizer)
