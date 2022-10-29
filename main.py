@@ -101,6 +101,7 @@ def validate(args, dev_dataloader, model, crf_model):
         mask_ids = data['attention_mask'].to(args.device)
         outputs = model(input_ids, labels=labels, attention_mask=mask_ids)
         if args.with_crf:
+            # incorrect !!!
             crf_emissions = outputs['logits'][:, 1:].contiguous()
             crf_tags = labels[:, 1:].contiguous()
             crf_tags[crf_tags==-100] = 0
@@ -165,6 +166,7 @@ def train(args, model, crf_model, tokenizer):
             mask_ids = data['attention_mask'].to(args.device)
             outputs = model(input_ids, labels=labels, attention_mask=mask_ids, return_dict=True)
             if args.with_crf:
+                # not know how to deal with the [CLS] and [SEP] situation
                 crf_emissions = outputs['logits'][:, 1:].contiguous()
                 crf_tags = labels[:, 1:].contiguous()
                 crf_tags[crf_tags==-100] = 0
@@ -192,9 +194,9 @@ def train(args, model, crf_model, tokenizer):
                     if eval_f1 > best_eval_f1:
                         if best_checkpoint_name is not None:
                             os.remove(best_checkpoint_name)
-                            best_checkpoint_name = args.checkpoint_save_dir + 'best_model4{}_f1_{}_{}.ckpt'.format(args.task, round(eval_f1*100,3), args.timestamp)
+                            best_checkpoint_name = args.checkpoint_save_dir + 'best_{}4{}_f1_{}_{}.ckpt'.format(args.model_name, args.task, round(eval_f1*100,3), args.timestamp)
                         else:
-                            best_checkpoint_name = args.checkpoint_save_dir + 'best_model4{}_f1_{}_{}.ckpt'.format(args.task, round(eval_f1*100,3), args.timestamp)
+                            best_checkpoint_name = args.checkpoint_save_dir + 'best_{}4{}_f1_{}_{}.ckpt'.format(args.model_name, args.task, round(eval_f1*100,3), args.timestamp)
                         model_to_save = model.module if hasattr(model, 'module') else model
                         output_model_file = best_checkpoint_name
                         torch.save(model_to_save.state_dict(), output_model_file)
@@ -203,9 +205,9 @@ def train(args, model, crf_model, tokenizer):
                     if eval_loss < best_eval_loss:
                         if best_checkpoint_name is not None:
                             os.remove(best_checkpoint_name)
-                            best_checkpoint_name = args.checkpoint_save_dir + 'best_model4{}_loss_{}_{}.ckpt'.format(args.task, round(eval_loss,3), args.timestamp)
+                            best_checkpoint_name = args.checkpoint_save_dir + 'best_{}4{}_loss_{}_{}.ckpt'.format(args.model_name, args.task, round(eval_loss,3), args.timestamp)
                         else:
-                            best_checkpoint_name = args.checkpoint_save_dir + 'best_model4{}_loss_{}_{}.ckpt'.format(args.task, round(eval_loss,3), args.timestamp)
+                            best_checkpoint_name = args.checkpoint_save_dir + 'best_{}4{}_loss_{}_{}.ckpt'.format(args.model_name, args.task, round(eval_loss,3), args.timestamp)
                         model_to_save = model.module if hasattr(model, 'module') else model
                         output_model_file = best_checkpoint_name
                         torch.save(model_to_save.state_dict(), output_model_file)
@@ -216,7 +218,7 @@ def train(args, model, crf_model, tokenizer):
         print(f'Epoch {epoch} loss: {epoch_loss}')
 
     src_file = best_checkpoint_name
-    tgt_file = args.checkpoint_save_dir + 'best_model4{}.ckpt'.format(args.task)
+    tgt_file = args.checkpoint_save_dir + 'best_{}4{}.ckpt'.format(args.model_name, args.task)
     shutil.copy(src_file, tgt_file)
     return
 
