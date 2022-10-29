@@ -9,4 +9,5 @@ python -m torch.distributed.launch --nproc_per_node=$NGPU --master_port 29519 ma
 --test_file ./data/sciner_dataset/validation.conll \
 --checkpoint_save_dir ./checkpoints/ \
 --inference_file ./data/anlp_test/anlp-sciner-test-sentences.txt \
---output_file ./data/anlp_test/anlp-sciner-test-sentences.conll
+--output_file ./data/anlp_test/anlp-sciner-test-sentences.conll \
+--label_num 15

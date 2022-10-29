@@ -5,20 +5,19 @@ from torch.utils.data import Dataset
 
 
 class SciNERDataset(Dataset):
-    entities = [
-        'O',
-        'B-MethodName', 'I-MethodName', 'B-HyperparameterName', 'I-HyperparameterName',
-        'B-HyperparameterValue', 'I-HyperparameterValue', 'B-MetricName', 'I-MetricName',
-        'B-MetricValue', 'I-MetricValue', 'B-TaskName', 'I-TaskName', 'B-DatasetName', 'I-DatasetName'
-    ]
-    entity2id = {e: i for i, e in enumerate(entities)}
-    id2entity = {i: e for i, e in enumerate(entities)}
-
     def __init__(self, file, tokenizer, sep=' -X- _ '):
+        entities = [
+            'O',
+            'B-MethodName', 'I-MethodName', 'B-HyperparameterName', 'I-HyperparameterName',
+            'B-HyperparameterValue', 'I-HyperparameterValue', 'B-MetricName', 'I-MetricName',
+            'B-MetricValue', 'I-MetricValue', 'B-TaskName', 'I-TaskName', 'B-DatasetName', 'I-DatasetName',
+        ]
         self.tokenizer = tokenizer
         self.sep = sep
-
+        self.entity2id = {e: i for i, e in enumerate(entities)}
+        self.id2entity = {i: e for i, e in enumerate(entities)}
         self.data = self._read_conll_file(file)
+
 
     def _read_conll_file(self, file):
         with open(file, 'r') as f:
@@ -83,9 +82,10 @@ class SciNERDataset(Dataset):
             instance_token_ids += [self.tokenizer.pad_token_id for _ in range(max_length - len(instance_token_ids))]
             input_ids.append(instance_token_ids)
 
-            instance_labels = [-100]
+            instance_labels = [-100] # [cls] token
             instance_labels += instance['labels']
             instance_labels = instance_labels[:(max_length - 1)]
+            instance_labels += [-100] # [sep] token
             instance_labels += [-100 for _ in range(max_length - len(instance_labels))]
             labels.append(instance_labels)
 

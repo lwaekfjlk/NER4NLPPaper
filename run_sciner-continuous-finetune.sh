@@ -10,10 +10,11 @@ python -m torch.distributed.launch --nproc_per_node=$NGPU --master_port 29519 ma
 --checkpoint_save_dir ./checkpoints/ \
 --task sciner-finetune \
 --train_batch_size 8 \
+--gradient_accumulation_step 1 \
 --dev_batch_size 8 \
 --max_length 512 \
 --num_epochs 30 \
 --learning_rate 1e-5 \
---label_num 15 \
+--label_num 17 \
 --evaluation_steps 50 \
 --load_from_checkpoint ./checkpoints/best_model4scirex-finetune.ckpt \

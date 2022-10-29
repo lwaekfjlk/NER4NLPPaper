@@ -10,6 +10,7 @@ python -m torch.distributed.launch --nproc_per_node=$NGPU --master_port 29519 ma
 --checkpoint_save_dir ./checkpoints/ \
 --task scirex-finetune \
 --train_batch_size 8 \
+--gradient_accumulation_step 1 \
 --dev_batch_size 4 \
 --max_length 512 \
 --num_epochs 10 \

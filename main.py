@@ -13,6 +13,7 @@ from transformers import get_cosine_schedule_with_warmup
 from dataset import ScirexDataset, SciNERDataset
 from torch.utils.data import DataLoader
 from torch.nn.parallel import DistributedDataParallel as DDP
+from torchcrf import CRF
 
 
 def load_dataset(args, tokenizer):
@@ -87,7 +88,7 @@ def validate(args, dev_dataloader, model):
         'O',
         'B-MethodName', 'I-MethodName', 'B-HyperparameterName', 'I-HyperparameterName',
         'B-HyperparameterValue', 'I-HyperparameterValue', 'B-MetricName', 'I-MetricName',
-        'B-MetricValue', 'I-MetricValue', 'B-TaskName', 'I-TaskName', 'B-DatasetName', 'I-DatasetName'
+        'B-MetricValue', 'I-MetricValue', 'B-TaskName', 'I-TaskName', 'B-DatasetName', 'I-DatasetName',
     ]
     correct_ones = 0
     all_ones = 0
@@ -125,7 +126,8 @@ def validate(args, dev_dataloader, model):
 
 def train(args, model, tokenizer):
     best_checkpoint_name = None
-    best_eval_f1 = -1
+    best_eval_f1 = -float('inf')
+    best_eval_loss = float('inf')
     global_step = 0
     step = 0
     print('=====begin loading dataset====')
@@ -137,6 +139,8 @@ def train(args, model, tokenizer):
     optimizer = attach_optimizer(args, model)
     total_training_steps = len(train_dataloader) * args.num_epochs
     scheduler = attach_scheduler(args, optimizer, total_training_steps)
+    if args.with_crf:
+        crf_model = CRF(args.label_num, batch_first=True).to(args.device)
 
     train_losses = []
     for epoch in range(args.num_epochs):
@@ -145,15 +149,22 @@ def train(args, model, tokenizer):
             labels = data['labels'].to(args.device)
             mask_ids = data['attention_mask'].to(args.device)
             outputs = model(input_ids, labels=labels, attention_mask=mask_ids, return_dict=True)
-            loss = outputs['loss']
+            if args.with_crf:
+                crf_emissions = outputs['logits'][:, 1:].contiguous()
+                crf_tags = labels[:, 1:].contiguous()
+                crf_tags[crf_tags==-100] = 0
+                crf_mask = mask_ids[:, 1:].contiguous().byte()
+                loss = crf_model.forward(crf_emissions, crf_tags, mask=crf_mask)
+            else:
+                loss = outputs['loss']
             loss.backward()
             train_losses.append(loss.item())
             step += 1
             if step % args.gradient_accumulation_step == 0:
-                global_step += 1
                 optimizer.step()
                 optimizer.zero_grad()
                 scheduler.step()
+                global_step += 1
             if args.use_wandb:
                 wandb.log({'learning rate': scheduler.get_last_lr()[0], 'step': global_step})
 
@@ -162,16 +173,30 @@ def train(args, model, tokenizer):
                 if args.use_wandb:
                     wandb.log({'eval_f1': eval_f1, 'step': global_step})
                     wandb.log({'eval_loss': eval_loss, 'step': global_step})
-                if eval_f1 > best_eval_f1:
-                    if best_checkpoint_name is not None:
-                        os.remove(best_checkpoint_name)
-                        best_checkpoint_name = args.checkpoint_save_dir + 'best_model4{}_f1_{}_{}.ckpt'.format(args.task, round(eval_f1*100,3), args.timestamp)
-                    else:
-                        best_checkpoint_name = args.checkpoint_save_dir + 'best_model4{}_f1_{}_{}.ckpt'.format(args.task, round(eval_f1*100,3), args.timestamp)
-                    model_to_save = model.module if hasattr(model, 'module') else model
-                    output_model_file = best_checkpoint_name
-                    torch.save(model_to_save.state_dict(), output_model_file)
-                    best_eval_f1 = eval_f1
+                if args.model_chosen_metric == 'f1':
+                    if eval_f1 > best_eval_f1:
+                        if best_checkpoint_name is not None:
+                            os.remove(best_checkpoint_name)
+                            best_checkpoint_name = args.checkpoint_save_dir + 'best_model4{}_f1_{}_{}.ckpt'.format(args.task, round(eval_f1*100,3), args.timestamp)
+                        else:
+                            best_checkpoint_name = args.checkpoint_save_dir + 'best_model4{}_f1_{}_{}.ckpt'.format(args.task, round(eval_f1*100,3), args.timestamp)
+                        model_to_save = model.module if hasattr(model, 'module') else model
+                        output_model_file = best_checkpoint_name
+                        torch.save(model_to_save.state_dict(), output_model_file)
+                        best_eval_f1 = eval_f1
+                elif args.model_chosen_metric == 'loss':
+                    if eval_loss < best_eval_loss:
+                        if best_checkpoint_name is not None:
+                            os.remove(best_checkpoint_name)
+                            best_checkpoint_name = args.checkpoint_save_dir + 'best_model4{}_loss_{}_{}.ckpt'.format(args.task, round(eval_loss,3), args.timestamp)
+                        else:
+                            best_checkpoint_name = args.checkpoint_save_dir + 'best_model4{}_loss_{}_{}.ckpt'.format(args.task, round(eval_loss,3), args.timestamp)
+                        model_to_save = model.module if hasattr(model, 'module') else model
+                        output_model_file = best_checkpoint_name
+                        torch.save(model_to_save.state_dict(), output_model_file)
+                        best_eval_loss = eval_loss
+                else:
+                    raise NotImplementedError
         epoch_loss = sum(train_losses) / len(train_losses)
         print(f'Epoch {epoch} loss: {epoch_loss}')
 
@@ -190,7 +215,7 @@ def sciner_inference(args, model, tokenizer):
         'O',
         'B-MethodName', 'I-MethodName', 'B-HyperparameterName', 'I-HyperparameterName',
         'B-HyperparameterValue', 'I-HyperparameterValue', 'B-MetricName', 'I-MetricName',
-        'B-MetricValue', 'I-MetricValue', 'B-TaskName', 'I-TaskName', 'B-DatasetName', 'I-DatasetName'
+        'B-MetricValue', 'I-MetricValue', 'B-TaskName', 'I-TaskName', 'B-DatasetName', 'I-DatasetName',
     ]
 
     model.load_state_dict(torch.load(args.checkpoint_save_dir + 'best_model4{}.ckpt'.format(args.task)))
@@ -247,6 +272,7 @@ if __name__ == '__main__':
     parser.add_argument('--output_file', type=str, default='./data/anlp_test/anlp_haofeiy_sciner.conll')
     parser.add_argument('--task', type=str, default='sciner-finetune', choices=['sciner-finetune', 'scirex-finetune'])
     parser.add_argument('--load_from_checkpoint', type=str, default=None, help='contine finetuning based on one checkpoint')
+    parser.add_argument('--model_chosen_metric', type=str, default='f1', help='choose dev checkpoint based on this metric')
     parser.add_argument('--checkpoint_save_dir', type=str, default='./checkpoints/')
     parser.add_argument('--train_batch_size', type=int, default=4)
     parser.add_argument('--gradient_accumulation_step', type=int, default=4)
@@ -268,6 +294,7 @@ if __name__ == '__main__':
     parser.add_argument('--local_rank', type=int, default=-1)
     parser.add_argument('--evaluation_steps', type=int, default=50)
     parser.add_argument('--use_wandb', action='store_true')
+    parser.add_argument('--with_crf', action='store_true')
 
     args = parser.parse_args()
 
