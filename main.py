@@ -114,7 +114,6 @@ def validate(args, dev_dataloader, model, crf_model):
             references = crf_tags.view(-1).tolist()
             masks = crf_mask.view(-1).tolist()
             references = [label for idx,label in enumerate(references) if masks[idx] != 0]
-            # import pdb; pdb.set_trace()
             pred_labels.append(predictions)
             gth_labels.append(references)
         else:
@@ -294,7 +293,6 @@ def sciner_inference(args, model, crf_model, tokenizer):
                 for w, e in zip(final_words, final_entities):
                     output_f.write('{}\t{}\n'.format(w, e))
             else:
-                import pdb; pdb.set_trace()
                 target_words = sent.strip().split(' ')
                 ner_res = ner_pipeline(sent)
                 words = []
