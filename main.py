@@ -111,9 +111,10 @@ def validate(args, dev_dataloader, model, crf_model):
             predictions = []
             for result in decoded_results:
                 predictions += result
-            references = labels.view(-1).tolist()
-            references = [label for label in references if label != -100]
-            import pdb; pdb.set_trace()
+            references = crf_tags.view(-1).tolist()
+            masks = crf_mask.view(-1).tolist()
+            references = [label for idx,label in enumerate(references) if masks[idx] != 0]
+            # import pdb; pdb.set_trace()
             pred_labels.append(predictions)
             gth_labels.append(references)
         else:
@@ -171,7 +172,7 @@ def train(args, model, crf_model, tokenizer):
                 crf_tags = labels[:, 1:].contiguous()
                 crf_tags[crf_tags==-100] = 0
                 crf_mask = mask_ids[:, 1:].contiguous().byte()
-                loss = crf_model.forward(crf_emissions, crf_tags, mask=crf_mask)
+                loss = -crf_model.forward(crf_emissions, crf_tags, mask=crf_mask)
             else:
                 loss = outputs['loss']
             loss.backward()
@@ -194,23 +195,35 @@ def train(args, model, crf_model, tokenizer):
                     if eval_f1 > best_eval_f1:
                         if best_checkpoint_name is not None:
                             os.remove(best_checkpoint_name)
+                            if args.with_crf:
+                                os.remove(best_checkpoint_name.replace('.ckpt', '_crf.ckpt'))
                             best_checkpoint_name = args.checkpoint_save_dir + 'best_{}4{}_f1_{}_{}.ckpt'.format(args.model_name, args.task, round(eval_f1*100,3), args.timestamp)
                         else:
                             best_checkpoint_name = args.checkpoint_save_dir + 'best_{}4{}_f1_{}_{}.ckpt'.format(args.model_name, args.task, round(eval_f1*100,3), args.timestamp)
                         model_to_save = model.module if hasattr(model, 'module') else model
                         output_model_file = best_checkpoint_name
                         torch.save(model_to_save.state_dict(), output_model_file)
+                        if args.with_crf:
+                            crf_model_to_save = crf_model.module if hasattr(crf_model, 'module') else crf_model
+                            output_crf_model_file = best_checkpoint_name.replace('.ckpt', '_crf.ckpt')
+                            torch.save(crf_model_to_save.state_dict(), output_crf_model_file)
                         best_eval_f1 = eval_f1
                 elif args.model_chosen_metric == 'loss':
                     if eval_loss < best_eval_loss:
                         if best_checkpoint_name is not None:
                             os.remove(best_checkpoint_name)
+                            if args.with_crf:
+                                os.remove(best_checkpoint_name.replace('.ckpt', '_crf.ckpt'))
                             best_checkpoint_name = args.checkpoint_save_dir + 'best_{}4{}_loss_{}_{}.ckpt'.format(args.model_name, args.task, round(eval_loss,3), args.timestamp)
                         else:
                             best_checkpoint_name = args.checkpoint_save_dir + 'best_{}4{}_loss_{}_{}.ckpt'.format(args.model_name, args.task, round(eval_loss,3), args.timestamp)
                         model_to_save = model.module if hasattr(model, 'module') else model
                         output_model_file = best_checkpoint_name
                         torch.save(model_to_save.state_dict(), output_model_file)
+                        if args.with_crf:
+                            crf_model_to_save = crf_model.module if hasattr(crf_model, 'module') else crf_model
+                            output_crf_model_file = best_checkpoint_name.replace('.ckpt', '_crf.ckpt')
+                            torch.save(crf_model_to_save.state_dict(), output_crf_model_file)
                         best_eval_loss = eval_loss
                 else:
                     raise NotImplementedError
@@ -219,6 +232,10 @@ def train(args, model, crf_model, tokenizer):
 
     src_file = best_checkpoint_name
     tgt_file = args.checkpoint_save_dir + 'best_{}4{}.ckpt'.format(args.model_name, args.task)
+    if args.with_crf:
+        src_crf_file = best_checkpoint_name.replace('.ckpt', '_crf.ckpt')
+        tgt_crf_file = args.checkpoint_save_dir + 'best_{}4{}_crf.ckpt'.format(args.model_name, args.task)
+        shutil.copy(src_crf_file, tgt_crf_file)
     shutil.copy(src_file, tgt_file)
     return
 
@@ -227,7 +244,7 @@ def test(args, model, tokenizer):
     raise NotImplementedError
 
 
-def sciner_inference(args, model, tokenizer):
+def sciner_inference(args, model, crf_model, tokenizer):
     entities = [
         'O',
         'B-MethodName', 'I-MethodName', 'B-HyperparameterName', 'I-HyperparameterName',
@@ -243,33 +260,53 @@ def sciner_inference(args, model, tokenizer):
     with open(args.output_file, 'w', newline='') as output_f, open(args.inference_file, 'r') as input_f:
         sents = input_f.readlines()
         for sent in sents:
-            tokenized_sent = tokenizer.encode(sent)
-            outputs = model(input_ids=tokenized_sent)
-            import pdb; pdb.set_trace()
-            target_words = sent.strip().split(' ')
-            ner_res = ner_pipeline(sent)
-            words = []
-            entities = []
-            ner_index = 0
-            target_index = 0
-            while ner_index < len(ner_res):
-                sub_word = ner_res[ner_index]['word']
-                sub_word = sub_word.replace('##', '')
-                entity = ner_res[ner_index]['entity']
-                entity = id2entity[label2id[entity]]
-                words.append(sub_word)
-                entities.append(entity)
-                ner_index += 1
-                target_index += 1
-                match_word = tokenizer.decode(tokenizer.encode(target_words[target_index-1]), skip_special_tokens=True)
-                match_sub_word = tokenizer.decode(tokenizer.encode(words[-1]), skip_special_tokens=True)
-                while match_sub_word != match_word:
+            tokenized_sent = tokenizer.tokenize(sent)
+            input_ids = tokenizer.convert_tokens_to_ids(tokenizer.tokenize(sent))
+            input_ids = torch.tensor([tokenizer.cls_token_id] + input_ids + [tokenizer.sep_token_id]).unsqueeze(0).to(args.device)
+            outputs = model(input_ids=input_ids)
+            if args.with_crf:
+                crf_emissions = outputs['logits'][:, 1:].contiguous()
+                crf_mask = torch.ones(crf_emissions.shape[:2], dtype=torch.bool).to(args.device)
+                decoded_results = crf_model.decode(crf_emissions, mask=crf_mask)
+                target_words = sent.strip().split()
+                words = []
+                entities = []
+                for idx, subword in enumerate(tokenized_sent):
+                    if subword.startswith('##'):
+                        words[-1] += subword[2:]
+                    else:
+                        words.append(subword)
+                        entities.append(id2entity[decoded_results[0][idx]])
+                assert len(words) == len(entities)
+                for word, entity in zip(words, entities):
+                    output_f.write(word + '\t' + entity + '\n')
+                output_f.write('\n')
+            else:
+                import pdb; pdb.set_trace()
+                target_words = sent.strip().split(' ')
+                ner_res = ner_pipeline(sent)
+                words = []
+                entities = []
+                ner_index = 0
+                target_index = 0
+                while ner_index < len(ner_res):
                     sub_word = ner_res[ner_index]['word']
-                    words[-1] += sub_word.replace('##', '')
+                    sub_word = sub_word.replace('##', '')
+                    entity = ner_res[ner_index]['entity']
+                    entity = id2entity[label2id[entity]]
+                    words.append(sub_word)
+                    entities.append(entity)
                     ner_index += 1
+                    target_index += 1
+                    match_word = tokenizer.decode(tokenizer.encode(target_words[target_index-1]), skip_special_tokens=True)
                     match_sub_word = tokenizer.decode(tokenizer.encode(words[-1]), skip_special_tokens=True)
-                output_f.write(target_words[target_index-1]+'\t'+entities[-1]+'\n')
-            output_f.write('\n')
+                    while match_sub_word != match_word:
+                        sub_word = ner_res[ner_index]['word']
+                        words[-1] += sub_word.replace('##', '')
+                        ner_index += 1
+                        match_sub_word = tokenizer.decode(tokenizer.encode(words[-1]), skip_special_tokens=True)
+                    output_f.write(target_words[target_index-1]+'\t'+entities[-1]+'\n')
+                output_f.write('\n')
     return
 
 
@@ -317,8 +354,8 @@ if __name__ == '__main__':
     parser.add_argument('--with_crf', action='store_true')
 
     args = parser.parse_args()
-
-    args.local_rank = int(os.environ['LOCAL_RANK'])
+    if torch.cuda.device_count() > 1:
+        args.local_rank = int(os.environ['LOCAL_RANK'])
     args.timestamp = time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(round(time.time()*1000))/1000))
 
     if args.use_wandb:
@@ -336,16 +373,22 @@ if __name__ == '__main__':
     tokenizer = AutoTokenizer.from_pretrained(args.model_name)
     config = AutoConfig.from_pretrained(args.model_name, num_labels=args.label_num)
     model = AutoModelForTokenClassification.from_pretrained(args.model_name, config=config, ignore_mismatched_sizes=True)
+
+    device = torch.device(args.local_rank) if args.local_rank != -1 else torch.device('cuda')
+    
     if args.with_crf:
         crf_model = CRF(args.label_num, batch_first=True).to(args.device)
     else:
         crf_model = None
-    device = torch.device(args.local_rank) if args.local_rank != -1 else torch.device('cuda')
+    
     if args.load_from_checkpoint:
         model_dict = torch.load(args.load_from_checkpoint)
         filtered_model_dict = {k: v for k, v in model_dict.items() if 'classifier' not in k}
         model_dict.update(filtered_model_dict)
         model.load_state_dict(filtered_model_dict, strict=False)
+        if args.with_crf:
+            crf_dict = torch.load(args.load_from_checkpoint.replace('.ckpt', '_crf.ckpt'))
+            crf_model.load_state_dict(crf_dict)
     
     model.to(device)
     
