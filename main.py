@@ -268,7 +268,7 @@ def sciner_inference(args, model, crf_model, tokenizer):
                 crf_emissions = outputs['logits'][:, 1:].contiguous()
                 crf_mask = torch.ones(crf_emissions.shape[:2], dtype=torch.bool).to(args.device)
                 decoded_results = crf_model.decode(crf_emissions, mask=crf_mask)
-                target_words = sent.strip().split()
+                target_words = sent.strip().split(' ')
                 words = []
                 entities = []
                 for idx, subword in enumerate(tokenized_sent):
@@ -277,10 +277,22 @@ def sciner_inference(args, model, crf_model, tokenizer):
                     else:
                         words.append(subword)
                         entities.append(id2entity[decoded_results[0][idx]])
-                assert len(words) == len(entities)
-                for word, entity in zip(words, entities):
-                    output_f.write(word + '\t' + entity + '\n')
-                output_f.write('\n')
+                start_idx = 0
+                final_words = []
+                final_entities = []
+                for t_w in target_words:
+                    subword = words[start_idx]
+                    entity = entities[start_idx]
+                    if subword == '[UNK]':
+                        subword = t_w[0]
+                    while len(subword) < len(t_w):
+                        start_idx += 1
+                        subword += words[start_idx]
+                    final_words.append(t_w)
+                    final_entities.append(entity)
+                    start_idx += 1
+                for w, e in zip(final_words, final_entities):
+                    output_f.write('{}\t{}\n'.format(w, e))
             else:
                 import pdb; pdb.set_trace()
                 target_words = sent.strip().split(' ')
