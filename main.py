@@ -179,6 +179,8 @@ def train(args, model, crf_model, tokenizer):
                 loss = outputs['loss']
             loss.backward()
             train_losses.append(loss.item())
+            if args.use_wandb:
+                wandb.log({'train loss': loss.item()})
             step += 1
             if step % args.gradient_accumulation_step == 0:
                 optimizer.step()
@@ -200,9 +202,9 @@ def train(args, model, crf_model, tokenizer):
                                 os.remove(best_checkpoint_name)
                                 if args.with_crf:
                                     os.remove(best_checkpoint_name.replace('.ckpt', '_crf.ckpt'))
-                                best_checkpoint_name = args.checkpoint_save_dir + 'best_{}4{}_f1_{}_{}.ckpt'.format(args.model_name, args.task, round(eval_f1*100,3), args.timestamp)
+                                best_checkpoint_name = args.checkpoint_save_dir + 'best_{}4{}_f1_{}_{}.ckpt'.format(args.model_name.split('/')[-1], args.task, round(eval_f1*100,3), args.timestamp)
                             else:
-                                best_checkpoint_name = args.checkpoint_save_dir + 'best_{}4{}_f1_{}_{}.ckpt'.format(args.model_name, args.task, round(eval_f1*100,3), args.timestamp)
+                                best_checkpoint_name = args.checkpoint_save_dir + 'best_{}4{}_f1_{}_{}.ckpt'.format(args.model_name.split('/')[-1], args.task, round(eval_f1*100,3), args.timestamp)
                             model_to_save = model.module if hasattr(model, 'module') else model
                             output_model_file = best_checkpoint_name
                             torch.save(model_to_save.state_dict(), output_model_file)
@@ -217,9 +219,9 @@ def train(args, model, crf_model, tokenizer):
                                 os.remove(best_checkpoint_name)
                                 if args.with_crf:
                                     os.remove(best_checkpoint_name.replace('.ckpt', '_crf.ckpt'))
-                                best_checkpoint_name = args.checkpoint_save_dir + 'best_{}4{}_loss_{}_{}.ckpt'.format(args.model_name, args.task, round(eval_loss,3), args.timestamp)
+                                best_checkpoint_name = args.checkpoint_save_dir + 'best_{}4{}_loss_{}_{}.ckpt'.format(args.model_name.split('/')[-1], args.task, round(eval_loss,3), args.timestamp)
                             else:
-                                best_checkpoint_name = args.checkpoint_save_dir + 'best_{}4{}_loss_{}_{}.ckpt'.format(args.model_name, args.task, round(eval_loss,3), args.timestamp)
+                                best_checkpoint_name = args.checkpoint_save_dir + 'best_{}4{}_loss_{}_{}.ckpt'.format(args.model_name.split('/')[-1], args.task, round(eval_loss,3), args.timestamp)
                             model_to_save = model.module if hasattr(model, 'module') else model
                             output_model_file = best_checkpoint_name
                             torch.save(model_to_save.state_dict(), output_model_file)
@@ -234,10 +236,10 @@ def train(args, model, crf_model, tokenizer):
         print(f'Epoch {epoch} loss: {epoch_loss}')
 
     src_file = best_checkpoint_name
-    tgt_file = args.checkpoint_save_dir + 'best_{}4{}.ckpt'.format(args.model_name, args.task)
+    tgt_file = args.checkpoint_save_dir + 'best_{}4{}.ckpt'.format(args.model_name.split('/')[-1], args.task)
     if args.with_crf:
         src_crf_file = best_checkpoint_name.replace('.ckpt', '_crf.ckpt')
-        tgt_crf_file = args.checkpoint_save_dir + 'best_{}4{}_crf.ckpt'.format(args.model_name, args.task)
+        tgt_crf_file = args.checkpoint_save_dir + 'best_{}4{}_crf.ckpt'.format(args.model_name.split('/')[-1], args.task)
         shutil.copy(src_crf_file, tgt_crf_file)
     shutil.copy(src_file, tgt_file)
     return

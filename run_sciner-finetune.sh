@@ -17,5 +17,4 @@ python -m torch.distributed.launch --nproc_per_node=$NGPU --master_port 29519 ma
 --num_epochs 30 \
 --learning_rate 1e-5 \
 --label_num 15 \
---evaluation_steps 50 \
---with_crf
+--evaluation_steps 50
