@@ -2,11 +2,10 @@ python -m explainaboard_client.cli.evaluate_system \
   --username $EB_USERNAME \
   --api-key $EB_API_KEY \
   --task named-entity-recognition \
-  --system-name anlp_haofeiy_sciner \
+  --system-name anlp_haofeiy_sciner_test \
   --dataset cmu_anlp \
   --sub-dataset sciner \
   --split test \
   --system-output-file ./data/anlp_test/output.conll \
   --system-output-file-type conll \
-  --shared-users neubig@gmail.com \
   --source-language en

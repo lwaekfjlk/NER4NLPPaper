@@ -262,7 +262,7 @@ def sciner_inference(args, model, crf_model, tokenizer):
     ner_pipeline = pipeline("ner", model=model, tokenizer=tokenizer, device=0)
     with open(args.output_file, 'w', newline='') as output_f, open(args.inference_file, 'r') as input_f:
         sents = input_f.readlines()
-        for sent in sents:
+        for sent in tqdm(sents):
             tokenized_sent = tokenizer.tokenize(sent)
             input_ids = tokenizer.convert_tokens_to_ids(tokenizer.tokenize(sent))
             input_ids = torch.tensor([tokenizer.cls_token_id] + input_ids + [tokenizer.sep_token_id]).unsqueeze(0).to(args.device)
