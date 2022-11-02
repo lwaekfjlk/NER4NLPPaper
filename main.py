@@ -257,7 +257,9 @@ def sciner_inference(args, model, crf_model, tokenizer):
         'B-MetricValue', 'I-MetricValue', 'B-TaskName', 'I-TaskName', 'B-DatasetName', 'I-DatasetName',
     ]
 
-    model.load_state_dict(torch.load(args.checkpoint_save_dir + 'best_model4{}.ckpt'.format(args.task)))
+    model.load_state_dict(torch.load(args.checkpoint_save_dir + 'best_{}4{}.ckpt'.format(args.model_name.split('/')[-1], args.task)))
+    if args.with_crf:
+        crf_model.load_state_dict(torch.load(args.checkpoint_save_dir + 'best_{}4{}_crf.ckpt'.format(args.model_name.split('/')[-1], args.task)))
     id2entity = {i: e for i, e in enumerate(entities)}
     label2id = model.config.label2id
 
@@ -298,6 +300,7 @@ def sciner_inference(args, model, crf_model, tokenizer):
                     start_idx += 1
                 for w, e in zip(final_words, final_entities):
                     output_f.write('{}\t{}\n'.format(w, e))
+                output_f.write('\n')
             else:
                 target_words = sent.strip().split(' ')
                 ner_res = ner_pipeline(sent)
@@ -353,7 +356,7 @@ if __name__ == '__main__':
     parser.add_argument('--test_batch_size', type=int, default=4)
     parser.add_argument('--max_length', type=int, default=512)
     parser.add_argument('--num_epochs', type=int, default=10)
-    parser.add_argument('--learning_rate', type=float, default=1e-5)
+    parser.add_argument('--learning_rate', type=float, default=5e-5)
     parser.add_argument('--optimizer_type', type=str, default='adamw')
     parser.add_argument('--scheduler_type', type=str, default='cosine')
     parser.add_argument('--weight_decay', type=float, default=0.0)

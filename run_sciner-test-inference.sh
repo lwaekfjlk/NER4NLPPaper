@@ -3,6 +3,8 @@ export NGPU=1
 python -m torch.distributed.launch --nproc_per_node=$NGPU --master_port 29519 main.py \
 --inference \
 --task sciner-finetune \
+--model_name allenai/scibert_scivocab_uncased \
+--with_crf \
 --dataset sciner \
 --train_file ./data/sciner_dataset/train.conll \
 --dev_file ./data/sciner_dataset/validation.conll \
@@ -11,3 +13,5 @@ python -m torch.distributed.launch --nproc_per_node=$NGPU --master_port 29519 ma
 --inference_file ./data/anlp_test/anlp-sciner-test-sentences.txt \
 --output_file ./data/anlp_test/anlp-sciner-test-sentences.conll \
 --label_num 15
+
+python sentence_to_paragraph.py
