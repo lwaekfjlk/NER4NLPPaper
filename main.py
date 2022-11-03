@@ -104,11 +104,11 @@ def validate(args, dev_dataloader, model, crf_model):
             outputs = model(input_ids, labels=labels, attention_mask=mask_ids)
             if args.with_crf:
                 # incorrect !!!
-                crf_emissions = outputs['logits'][:, 1:].contiguous()
-                crf_tags = labels[:, 1:].contiguous()
+                crf_emissions = outputs['logits'][:, 1:-1].contiguous()
+                crf_tags = labels[:, 1:-1].contiguous()
                 crf_tags[crf_tags==-100] = 0
-                crf_mask = mask_ids[:, 1:].contiguous().byte()
-                eval_loss = crf_model.forward(crf_emissions, crf_tags, mask=crf_mask)
+                crf_mask = mask_ids[:, 1:-1].contiguous().byte()
+                eval_loss = -crf_model.forward(crf_emissions, crf_tags, mask=crf_mask)
                 decoded_results = crf_model.decode(crf_emissions, mask=crf_mask)
                 predictions = []
                 for result in decoded_results:
