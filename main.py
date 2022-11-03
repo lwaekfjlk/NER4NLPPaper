@@ -169,11 +169,11 @@ def train(args, model, crf_model, tokenizer):
             mask_ids = data['attention_mask'].to(args.device)
             outputs = model(input_ids, labels=labels, attention_mask=mask_ids, return_dict=True)
             if args.with_crf:
-                # not know how to deal with the [CLS] and [SEP] situation
-                crf_emissions = outputs['logits'][:, 1:].contiguous()
-                crf_tags = labels[:, 1:].contiguous()
+                # skip the [CLS] and [SEP]
+                crf_emissions = outputs['logits'][:, 1:-1].contiguous()
+                crf_tags = labels[:, 1:-1].contiguous()
                 crf_tags[crf_tags==-100] = 0
-                crf_mask = mask_ids[:, 1:].contiguous().byte()
+                crf_mask = mask_ids[:, 1:-1].contiguous().byte()
                 loss = -crf_model.forward(crf_emissions, crf_tags, mask=crf_mask)
             else:
                 loss = outputs['loss']
@@ -249,83 +249,70 @@ def test(args, model, tokenizer):
     raise NotImplementedError
 
 
-def sciner_inference(args, model, crf_model, tokenizer):
-    entities = [
+def ner_inference(args, sent, model, crf_model, tokenizer):
+    id2entity = [
         'O',
         'B-MethodName', 'I-MethodName', 'B-HyperparameterName', 'I-HyperparameterName',
         'B-HyperparameterValue', 'I-HyperparameterValue', 'B-MetricName', 'I-MetricName',
         'B-MetricValue', 'I-MetricValue', 'B-TaskName', 'I-TaskName', 'B-DatasetName', 'I-DatasetName',
     ]
 
+    tokenized_sent = tokenizer.tokenize(sent)
+    input_ids = tokenizer.encode(sent)
+    input_ids = torch.tensor([input_ids]).to(args.device)
+    outputs = model(input_ids=input_ids)
+    logits = outputs['logits'][:, 1:-1] # delete the [CLS] and [SEP] token
+    if args.with_crf:
+        crf_emissions = logits
+        crf_mask = logits.new_ones(logits.shape[:2], dtype=torch.bool)
+        predictions = crf_model.decode(crf_emissions, mask=crf_mask)[0]
+    else:
+        predictions = torch.argmax(logits, dim=-1)[0].tolist()
+
+    entities = []
+    words = []
+    for pred, token in zip(predictions, tokenized_sent):
+        entity = id2entity[pred]
+        if 'I-' in entity and (len(entities) == 0 or entities[-1] == 'O'):
+            entity = entity.replace('I-', 'B-')
+        entities.append(entity)
+        words.append(token.replace('##', ''))
+    assert len(entities) == len(words)
+    return words, entities
+
+
+
+def sciner_inference(args, model, crf_model, tokenizer):
     model.load_state_dict(torch.load(args.checkpoint_save_dir + 'best_{}4{}.ckpt'.format(args.model_name.split('/')[-1], args.task)))
     if args.with_crf:
         crf_model.load_state_dict(torch.load(args.checkpoint_save_dir + 'best_{}4{}_crf.ckpt'.format(args.model_name.split('/')[-1], args.task)))
-    id2entity = {i: e for i, e in enumerate(entities)}
-    label2id = model.config.label2id
 
-    ner_pipeline = pipeline("ner", model=model, tokenizer=tokenizer, device=0)
     with open(args.output_file, 'w', newline='') as output_f, open(args.inference_file, 'r') as input_f:
         sents = input_f.readlines()
         for sent in tqdm(sents):
-            tokenized_sent = tokenizer.tokenize(sent)
-            input_ids = tokenizer.convert_tokens_to_ids(tokenizer.tokenize(sent))
-            input_ids = torch.tensor([tokenizer.cls_token_id] + input_ids + [tokenizer.sep_token_id]).unsqueeze(0).to(args.device)
-            outputs = model(input_ids=input_ids)
-            if args.with_crf:
-                crf_emissions = outputs['logits'][:, 1:].contiguous()
-                crf_mask = torch.ones(crf_emissions.shape[:2], dtype=torch.bool).to(args.device)
-                decoded_results = crf_model.decode(crf_emissions, mask=crf_mask)
-                target_words = sent.strip().split(' ')
-                words = []
-                entities = []
-                for idx, subword in enumerate(tokenized_sent):
-                    if subword.startswith('##'):
-                        words[-1] += subword[2:]
-                    else:
-                        words.append(subword)
-                        entities.append(id2entity[decoded_results[0][idx]])
-                start_idx = 0
-                final_words = []
-                final_entities = []
-                for t_w in target_words:
-                    subword = words[start_idx]
-                    entity = entities[start_idx]
-                    if subword == '[UNK]':
-                        subword = t_w[0]
-                    while len(subword) < len(t_w):
-                        start_idx += 1
-                        subword += words[start_idx]
-                    final_words.append(t_w)
-                    final_entities.append(entity)
-                    start_idx += 1
-                for w, e in zip(final_words, final_entities):
-                    output_f.write('{}\t{}\n'.format(w, e))
-                output_f.write('\n')
-            else:
-                target_words = sent.strip().split(' ')
-                ner_res = ner_pipeline(sent)
-                words = []
-                entities = []
-                ner_index = 0
-                target_index = 0
-                while ner_index < len(ner_res):
-                    sub_word = ner_res[ner_index]['word']
-                    sub_word = sub_word.replace('##', '')
-                    entity = ner_res[ner_index]['entity']
-                    entity = id2entity[label2id[entity]]
-                    words.append(sub_word)
-                    entities.append(entity)
-                    ner_index += 1
-                    target_index += 1
-                    match_word = tokenizer.decode(tokenizer.encode(target_words[target_index-1]), skip_special_tokens=True)
-                    match_sub_word = tokenizer.decode(tokenizer.encode(words[-1]), skip_special_tokens=True)
-                    while match_sub_word != match_word:
-                        sub_word = ner_res[ner_index]['word']
-                        words[-1] += sub_word.replace('##', '')
-                        ner_index += 1
-                        match_sub_word = tokenizer.decode(tokenizer.encode(words[-1]), skip_special_tokens=True)
-                    output_f.write(target_words[target_index-1]+'\t'+entities[-1]+'\n')
-                output_f.write('\n')
+            def unk_wrapper(word):
+                return tokenizer.decode(tokenizer.encode(word))
+            words = sent.strip().split(' ')
+            src_words, src_entities = ner_inference(args, sent, model, crf_model, tokenizer)
+            tgt_words = []
+            tgt_entities = []
+            src_index = 0
+            tgt_index = 0
+            while src_index < len(src_words):
+                output_word = words[tgt_index]
+                output_entity = src_entities[src_index]
+                tgt_words.append(src_words[src_index])
+                tgt_entities.append(src_entities[src_index])
+                matcher = unk_wrapper(words[tgt_index])
+                matchee = unk_wrapper(tgt_words[-1])
+                src_index += 1
+                tgt_index += 1
+                while matcher != matchee:
+                    tgt_words[-1] += src_words[src_index]
+                    src_index += 1
+                    matchee = unk_wrapper(tgt_words[-1])
+                output_f.write(output_word + '\t' + output_entity + '\n')
+            output_f.write('\n')
     return
 
 

@@ -4,6 +4,7 @@ python -m torch.distributed.launch --nproc_per_node=$NGPU --master_port 29519 ma
 --train \
 --use_wandb \
 --model_name allenai/scibert_scivocab_uncased \
+--with_crf \
 --dataset sciner \
 --train_file ./data/sciner_dataset/train.conll \
 --dev_file ./data/sciner_dataset/validation.conll \
