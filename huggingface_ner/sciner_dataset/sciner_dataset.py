@@ -57,8 +57,8 @@ class OurData(datasets.GeneratorBasedBuilder):
         dataset_dir = './sciner_dataset/'
         data_files = {
             "train": os.path.join(dataset_dir, "train.conll"),
-            "val": os.path.join(dataset_dir, "dev.conll"),
-            "test": os.path.join(dataset_dir, "dev.conll")
+            "val": os.path.join(dataset_dir, "validation.conll"),
+            "test": os.path.join(dataset_dir, "validation.conll")
         }
         return [
             datasets.SplitGenerator(name=datasets.Split.TRAIN, gen_kwargs={"filepath": data_files["train"]}),
