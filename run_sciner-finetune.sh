@@ -4,7 +4,6 @@ python -m torch.distributed.launch --nproc_per_node=$NGPU --master_port 29519 ma
 --train \
 --use_wandb \
 --model_name allenai/scibert_scivocab_uncased \
---with_crf \
 --dataset sciner \
 --train_file ./data/sciner_dataset/train.conll \
 --dev_file ./data/sciner_dataset/validation.conll \
@@ -12,7 +11,7 @@ python -m torch.distributed.launch --nproc_per_node=$NGPU --master_port 29519 ma
 --checkpoint_save_dir ./checkpoints/ \
 --task sciner-finetune \
 --train_batch_size 8 \
---gradient_accumulation_step 1 \
+--gradient_accumulation_step 4 \
 --model_chosen_metric f1 \
 --dev_batch_size 8 \
 --max_length 512 \

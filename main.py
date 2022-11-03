@@ -104,9 +104,10 @@ def validate(args, dev_dataloader, model, crf_model):
             outputs = model(input_ids, labels=labels, attention_mask=mask_ids)
             if args.with_crf:
                 # incorrect !!!
+                crf_labels = data['crf_labels'].to(args.device)
                 crf_emissions = outputs['logits'][:, 1:-1].contiguous()
-                crf_tags = labels[:, 1:-1].contiguous()
-                crf_tags[crf_tags==-100] = 0
+                crf_tags = crf_labels[:, 1:-1].contiguous()
+                crf_tags[crf_tags == -100] = 0
                 crf_mask = mask_ids[:, 1:-1].contiguous().byte()
                 eval_loss = -crf_model.forward(crf_emissions, crf_tags, mask=crf_mask)
                 decoded_results = crf_model.decode(crf_emissions, mask=crf_mask)
@@ -122,11 +123,14 @@ def validate(args, dev_dataloader, model, crf_model):
                 eval_loss = outputs['loss']
                 logits = outputs['logits']
                 predictions = torch.argmax(logits, dim=-1)
+                predictions[predictions>=args.label_num] = 0 # TODO: fix 15 to be a general var
+                labels[labels>=args.label_num] = -100
                 pred_labels.append(predictions.view(-1).tolist())
                 gth_labels.append(labels.view(-1).tolist())
 
             eval_losses.append(eval_loss.item()) 
     metric = evaluate.load("seqeval")
+    
     true_predictions = [
         [label_list[p] for (p, l) in zip(pred_label, gth_label) if l != -100]
         for pred_label, gth_label in zip(pred_labels, gth_labels)
@@ -169,10 +173,11 @@ def train(args, model, crf_model, tokenizer):
             mask_ids = data['attention_mask'].to(args.device)
             outputs = model(input_ids, labels=labels, attention_mask=mask_ids, return_dict=True)
             if args.with_crf:
+                crf_labels = data['crf_labels'].to(args.device)
                 # skip the [CLS] and [SEP]
                 crf_emissions = outputs['logits'][:, 1:-1].contiguous()
-                crf_tags = labels[:, 1:-1].contiguous()
-                crf_tags[crf_tags==-100] = 0
+                crf_tags = crf_labels[:, 1:-1].contiguous()
+                crf_tags[crf_tags == -100] = 0
                 crf_mask = mask_ids[:, 1:-1].contiguous().byte()
                 loss = -crf_model.forward(crf_emissions, crf_tags, mask=crf_mask)
             else:
@@ -262,22 +267,36 @@ def ner_inference(args, sent, model, crf_model, tokenizer):
     input_ids = torch.tensor([input_ids]).to(args.device)
     outputs = model(input_ids=input_ids)
     logits = outputs['logits'][:, 1:-1] # delete the [CLS] and [SEP] token
-    if args.with_crf:
-        crf_emissions = logits
-        crf_mask = logits.new_ones(logits.shape[:2], dtype=torch.bool)
-        predictions = crf_model.decode(crf_emissions, mask=crf_mask)[0]
-    else:
-        predictions = torch.argmax(logits, dim=-1)[0].tolist()
-
     entities = []
     words = []
-    for pred, token in zip(predictions, tokenized_sent):
-        entity = id2entity[pred]
-        if 'I-' in entity and (len(entities) == 0 or entities[-1] == 'O'):
-            entity = entity.replace('I-', 'B-')
-        entities.append(entity)
-        words.append(token.replace('##', ''))
-    assert len(entities) == len(words)
+    if args.with_crf:
+        crf_emissions = logits
+        crf_mask = []
+        for token in tokenized_sent:
+            crf_token_mask = True
+            crf_mask.append(crf_token_mask)
+        crf_mask = torch.tensor([crf_mask]).to(args.device)
+        predictions = crf_model.decode(crf_emissions, mask=crf_mask)[0]
+
+        index = 0
+        for token in tokenized_sent:
+            entity = id2entity[predictions[index]]
+            index += 1
+            if 'I-' in entity and (len(entities) == 0 or entities[-1] == 'O'):
+                entity = entity.replace('I-', 'B-')
+            entities.append(entity)
+            words.append(token.replace('##', ''))
+    else:
+        predictions = torch.argmax(logits, dim=-1)[0].tolist()
+        for pred, token in zip(predictions, tokenized_sent):
+            if pred >= args.label_num:
+                pred = 0
+            entity = id2entity[pred]
+            if 'I-' in entity and (len(entities) == 0 or entities[-1] == 'O'):
+                entity = entity.replace('I-', 'B-')
+            entities.append(entity)
+            words.append(token.replace('##', ''))
+        assert len(entities) == len(words)
     return words, entities
 
 
@@ -291,7 +310,7 @@ def sciner_inference(args, model, crf_model, tokenizer):
         sents = input_f.readlines()
         for sent in tqdm(sents):
             def unk_wrapper(word):
-                return tokenizer.decode(tokenizer.encode(word))
+                return tokenizer.decode(tokenizer.encode(word), skip_special_tokens=True)
             words = sent.strip().split(' ')
             src_words, src_entities = ner_inference(args, sent, model, crf_model, tokenizer)
             tgt_words = []
@@ -377,13 +396,13 @@ if __name__ == '__main__':
         wandb.init(project="SciNER")
 
     tokenizer = AutoTokenizer.from_pretrained(args.model_name)
-    config = AutoConfig.from_pretrained(args.model_name, num_labels=args.label_num)
+    config = AutoConfig.from_pretrained(args.model_name, num_labels=args.label_num+2)
     model = AutoModelForTokenClassification.from_pretrained(args.model_name, config=config, ignore_mismatched_sizes=True)
 
     device = torch.device(args.local_rank) if args.local_rank != -1 else torch.device('cuda')
     
     if args.with_crf:
-        crf_model = CRF(args.label_num, batch_first=True).to(args.device)
+        crf_model = CRF(args.label_num+2, batch_first=True).to(args.device)
     else:
         crf_model = None
     
