@@ -53,18 +53,19 @@ class OurData(datasets.GeneratorBasedBuilder):
         )
 
     def _split_generators(self, dl_manager):
-        import pdb; pdb.set_trace()
-        data_dir = './sciner_dataset/'
+        #dataset_dir = "https://github.com/realzza/711-project2/raw/main/our_data/mixed"
+        dataset_dir = './sciner_dataset/'
         data_files = {
-            "train": os.path.join(data_dir, "train.conll"),
-            "val": os.path.join(data_dir, "validation.conll"),
-            "test": os.path.join(data_dir, "validation.conll")
+            "train": os.path.join(dataset_dir, "train.conll"),
+            "val": os.path.join(dataset_dir, "dev.conll"),
+            "test": os.path.join(dataset_dir, "dev.conll")
         }
         return [
             datasets.SplitGenerator(name=datasets.Split.TRAIN, gen_kwargs={"filepath": data_files["train"]}),
             datasets.SplitGenerator(name=datasets.Split.VALIDATION, gen_kwargs={"filepath": data_files["val"]}),
             datasets.SplitGenerator(name=datasets.Split.TEST, gen_kwargs={"filepath": data_files["val"]}),
         ]
+
 
     def _generate_examples(self, filepath):
         logger.info("⏳ Generating examples from = %s", filepath)
