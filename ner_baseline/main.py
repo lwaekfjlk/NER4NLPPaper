@@ -184,13 +184,12 @@ def attach_scheduler(args, optimizer, train_dataloader):
 
 
 def save_model(best_ckpt_name, metric, best_metric):
-    model_name = args.model_name.split('/')[-1] # delete extra str for saving
     if (args.model_chosen_metric == 'f1' and metric['f1'] > best_metric['f1']) or \
        (args.model_chosen_metric == 'loss' and metric['loss'] < best_metric['loss']):
         if best_ckpt_name is not None:
             os.remove(os.path.join(args.ckpt_save_dir,best_ckpt_name))
         best_ckpt_name = 'best_{}4{}_{}_{}_{}.ckpt'.format(
-            model_name, 
+            args.model_type, 
             args.task, 
             args.model_chosen_metric, 
             round(metric[args.model_chosen_metric],3), 
@@ -205,7 +204,7 @@ def save_model(best_ckpt_name, metric, best_metric):
 
 def save_final_model(best_ckpt_name):
     src_file = os.path.join(args.ckpt_save_dir, best_ckpt_name)
-    tgt_file = os.path.join(args.ckpt_save_dir, 'best_{}4{}.ckpt'.format(args.model_name.split('/')[-1], args.task))
+    tgt_file = os.path.join(args.ckpt_save_dir, 'best_{}4{}.ckpt'.format(args.model_type, args.task))
     shutil.copy(src_file, tgt_file)
     return
 
@@ -339,7 +338,10 @@ def inference(args, model, tokenizer):
     def unk_wrapper(word):
         return tokenizer.decode(tokenizer.encode(word), skip_special_tokens=True)
 
-    model.load_state_dict(torch.load(args.ckpt_save_dir + 'best_{}4{}.ckpt'.format(args.model_name.split('/')[-1], args.task)))
+    model.load_state_dict(
+        torch.load(
+            os.join(args.ckpt_save_dir, 'best_{}4{}.ckpt'.format(args.model_type, args.task))
+    ))
     with open(args.output_file, 'w', newline='') as output_f, open(args.inference_file, 'r') as input_f:
         sents = input_f.readlines()
         for sent in tqdm(sents):
