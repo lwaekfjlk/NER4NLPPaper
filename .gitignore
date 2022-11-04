@@ -137,3 +137,4 @@ checkpoints/
 *.err
 
 checkpoints/
+huggingface_ner/sciner_output/runs/
