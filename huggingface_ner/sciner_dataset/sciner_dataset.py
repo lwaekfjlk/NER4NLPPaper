@@ -53,7 +53,6 @@ class OurData(datasets.GeneratorBasedBuilder):
         )
 
     def _split_generators(self, dl_manager):
-        #dataset_dir = "https://github.com/realzza/711-project2/raw/main/our_data/mixed"
         dataset_dir = './sciner_dataset/'
         data_files = {
             "train": os.path.join(dataset_dir, "train.conll"),
