@@ -11,7 +11,7 @@ class SciNERDataset(Dataset):
             'B-MethodName', 'I-MethodName', 'B-HyperparameterName', 'I-HyperparameterName',
             'B-HyperparameterValue', 'I-HyperparameterValue', 'B-MetricName', 'I-MetricName',
             'B-MetricValue', 'I-MetricValue', 'B-TaskName', 'I-TaskName', 'B-DatasetName', 'I-DatasetName',
-            'B-CLS', 'B-SEP'
+            'X',
         ]
         self.tokenizer = tokenizer
         self.sep = sep
@@ -88,17 +88,17 @@ class SciNERDataset(Dataset):
             instance_token_ids += [self.tokenizer.pad_token_id for _ in range(max_length - len(instance_token_ids))]
             input_ids.append(instance_token_ids)
 
-            instance_labels = [self.entity2id['B-CLS']] # [cls] token
+            instance_labels = [-100] # [cls] token
             instance_labels += instance['labels']
             instance_labels = instance_labels[:(max_length - 1)]
-            instance_labels += [self.entity2id['B-SEP']] # [sep] token
+            instance_labels += [-100] # [sep] token
             instance_labels += [-100 for _ in range(max_length - len(instance_labels))]
             labels.append(instance_labels)
 
-            instance_crf_labels = [self.entity2id['B-CLS']] # [cls] token
+            instance_crf_labels = [-100] # [cls] token
             instance_crf_labels += instance['crf_labels']
             instance_crf_labels = instance_labels[:(max_length - 1)]
-            instance_crf_labels += [self.entity2id['B-SEP']] # [sep] token
+            instance_crf_labels += [-100] # [sep] token
             instance_crf_labels += [-100 for _ in range(max_length - len(instance_labels))]
             crf_labels.append(instance_crf_labels)
 
@@ -110,7 +110,7 @@ class SciNERDataset(Dataset):
             'input_ids': torch.LongTensor(input_ids),
             'labels': torch.LongTensor(labels),
             'crf_labels': torch.LongTensor(crf_labels),
-            'attention_mask': torch.LongTensor(attention_mask)
+            'attention_mask': torch.BoolTensor(attention_mask)
         }
 
 

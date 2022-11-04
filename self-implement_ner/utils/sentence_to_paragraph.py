@@ -9,11 +9,11 @@ if __name__ == '__main__':
     '''
 
     parser = argparse.ArgumentParser()
-    parser.add_argument('-i', '--infile', default='./data/anlp_test/anlp-sciner-test-sentences.conll',
+    parser.add_argument('-i', '--infile', default='../data/anlp_test/anlp-sciner-test-sentences.conll',
         help='Your model outputs on the sentence-segmented test set in CoNLL format')
-    parser.add_argument('-d', '--dummyfile', default='./data/anlp_test/anlp-sciner-test-empty.conll',
+    parser.add_argument('-d', '--dummyfile', default='../data/anlp_test/anlp-sciner-test-empty.conll',
         help='The provided empty CoNLL file, used to determine the original paragraph boundaries')
-    parser.add_argument('-o', '--outfile', default='./data/anlp_test/output.conll',
+    parser.add_argument('-o', '--outfile', default='../data/anlp_test/output.conll',
         help='The output CoNLL file that restores paragraph segmentation')
     args = parser.parse_args()
 
