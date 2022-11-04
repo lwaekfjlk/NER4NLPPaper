@@ -6,6 +6,6 @@ python -m explainaboard_client.cli.evaluate_system \
   --dataset cmu_anlp \
   --sub-dataset sciner \
   --split test \
-  --system-output-file ./data/anlp_test/output.conll \
+  --system-output-file ../data/anlp_test/output.conll \
   --system-output-file-type conll \
   --source-language en
