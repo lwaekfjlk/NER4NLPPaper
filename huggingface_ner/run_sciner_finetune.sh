@@ -2,7 +2,7 @@ python run_ner.py \
   --model_name_or_path "allenai/scibert_scivocab_uncased" \
   --dataset_name ./sciner_dataset \
   --output_dir sciner_output \
-  --num_train_epochs 5 \
+  --num_train_epochs 30 \
   --per_device_train_batch_size 32 \
   --learning_rate 2e-5 \
   --do_train \

@@ -5,7 +5,6 @@ __pycache__/
 
 # C extensions
 *.so
-SciNER_tmp/
 # Distribution / packaging
 .Python
 build/
@@ -129,12 +128,12 @@ dmypy.json
 .pyre/
 
 # own files
-raw_data/
-data/
-checkpoints/
+self-implement_ner/raw_data/
+self-implement_ner/data/
+self-implement_ner/checkpoints/
+self-implement_ner/SciNER_tmp/
 *.out
 *.slurm
 *.err
 
-checkpoints/
 huggingface_ner/sciner_output/runs/
