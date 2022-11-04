@@ -1,7 +1,7 @@
 import jsonlines
-
 import torch
 from torch.utils.data import Dataset
+from torch.nn.utils.rnn import pad_sequence
 
 
 class SciNERDataset(Dataset):
@@ -14,13 +14,15 @@ class SciNERDataset(Dataset):
             'X',
         ]
         self.tokenizer = tokenizer
-        self.sep = sep
         self.entity2id = {e: i for i, e in enumerate(entities)}
         self.id2entity = {i: e for i, e in enumerate(entities)}
-        self.data = self._read_conll_file(file)
+        self.cls = self.tokenizer.cls_token_id
+        self.sep = self.tokenizer.sep_token_id
+        self.pad = self.tokenizer.pad_token_id
+        self.data = self._read_conll_file(file, sep)
 
 
-    def _read_conll_file(self, file):
+    def _read_conll_file(self, file, sep):
         with open(file, 'r') as f:
             lines = f.readlines()
 
@@ -30,35 +32,26 @@ class SciNERDataset(Dataset):
         for l in lines:
             l = l.strip()
             if len(l) == 0:
-                instance = self._create_example(sentence, sep=self.sep)
+                instance = self._create_example(sentence, sep=sep)
                 data.append(instance)
                 sentence = []
             else:
                 sentence.append(l)
-
         return data
 
     def _create_example(self, conll_sentence, sep=' -X- _ '):
-        example = {
-            'input_ids': [],
-            'labels': [],
-            'crf_labels': [],
-        }
-
+        example = {'input_ids': [], 'token_starts': [], 'labels': []}
         for line in conll_sentence:
-            token, tag = line.split(sep)[0], line.split(sep)[1]
+            token, tag = line.split(sep)
             token_ids = self.tokenizer.convert_tokens_to_ids(self.tokenizer.tokenize(token))
             label = self.entity2id[tag]
-            if len(token_ids) == 1:
-                labels = [label]
-                crf_labels = [label]
-            else:
-                labels = [label] + [-100 for _ in range(len(token_ids)-1)]
-                crf_labels = [label] + [label for _ in range(len(token_ids)-1)]
+            labels = [self.entity2id[tag]]
+            token_starts = [1] + [0 for _ in range(len(token_ids) - 1)]
             example['input_ids'] += token_ids
+            example['token_starts'] += token_starts
             example['labels'] += labels
-            example['crf_labels'] += crf_labels
-
+        example['input_ids'] = [self.cls] + example['input_ids'] + [self.sep]
+        example['token_starts'] = [0] + example['token_starts'] + [0]
         return example
 
     def __len__(self):
@@ -67,50 +60,34 @@ class SciNERDataset(Dataset):
     def __getitem__(self, index):
         return self.data[index]
 
-    def collate_fn(self, batch, max_length=None):
-        batch_max_length = max([len(instance['input_ids']) for instance in batch])
-
-        if max_length is None:
-            max_length = batch_max_length + 2
-        else:
-            max_length = min(max_length, batch_max_length + 2)
+    def collate_fn(self, batch, args):
+        max_len = args.max_length
+        device = args.device
 
         input_ids = []
+        token_starts = []
         labels = []
         crf_labels = []
         attention_mask = []
 
         for instance in batch:
-            instance_token_ids = [self.tokenizer.cls_token_id]
-            instance_token_ids += instance['input_ids']
-            instance_token_ids = instance_token_ids[:(max_length - 1)]
-            instance_token_ids += [self.tokenizer.sep_token_id]
-            instance_token_ids += [self.tokenizer.pad_token_id for _ in range(max_length - len(instance_token_ids))]
-            input_ids.append(instance_token_ids)
-
-            instance_labels = [-100] # [cls] token
-            instance_labels += instance['labels']
-            instance_labels = instance_labels[:(max_length - 1)]
-            instance_labels += [-100] # [sep] token
-            instance_labels += [-100 for _ in range(max_length - len(instance_labels))]
-            labels.append(instance_labels)
-
-            instance_crf_labels = [-100] # [cls] token
-            instance_crf_labels += instance['crf_labels']
-            instance_crf_labels = instance_labels[:(max_length - 1)]
-            instance_crf_labels += [-100] # [sep] token
-            instance_crf_labels += [-100 for _ in range(max_length - len(instance_labels))]
-            crf_labels.append(instance_crf_labels)
-
-            valid_token_length = min(max_length, len(instance['input_ids'])+2)
-            att_mask = [1 for i in range(valid_token_length)] + [0 for i in range(max_length - valid_token_length)]
-            attention_mask.append(att_mask)
+            input_id = torch.LongTensor(instance['input_ids'])
+            token_start = torch.ByteTensor(instance['token_starts'])
+            label = torch.LongTensor(instance['labels'])
+            input_ids.append(input_id)
+            token_starts.append(token_start)
+            labels.append(label)
+        
+        input_ids = pad_sequence(input_ids, batch_first=True, padding_value=self.pad)
+        token_starts = pad_sequence(token_starts, batch_first=True, padding_value=0)
+        labels = pad_sequence(labels, batch_first=True, padding_value=0)
+        attention_mask = torch.ne(input_ids, self.pad)
 
         return {
-            'input_ids': torch.LongTensor(input_ids),
-            'labels': torch.LongTensor(labels),
-            'crf_labels': torch.LongTensor(crf_labels),
-            'attention_mask': torch.BoolTensor(attention_mask)
+            'input_ids': input_ids[:, :max_len].to(device),
+            'token_starts': token_starts[:, :max_len].to(device),
+            'labels': labels[:, :max_len].to(device),
+            'attention_mask': attention_mask[:, :max_len].to(device),
         }
 
 

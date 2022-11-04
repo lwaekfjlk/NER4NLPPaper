@@ -15,6 +15,10 @@ from utils.dataset import ScirexDataset, SciNERDataset
 from torch.utils.data import DataLoader
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torchcrf import CRF
+from model import BertCRF, BertBiLSTMCRF, BertSoftmax
+
+import warnings
+warnings.filterwarnings('ignore')
 
 
 def load_dataset(args, tokenizer):
@@ -35,11 +39,11 @@ def load_dataset(args, tokenizer):
         if torch.cuda.device_count() > 1:
             train_sampler = torch.utils.data.distributed.DistributedSampler(train_dataset, num_replicas=dist.get_world_size(), rank=dist.get_rank(), shuffle=True)
             dev_sampler = torch.utils.data.distributed.DistributedSampler(dev_dataset, num_replicas=dist.get_world_size(), rank=dist.get_rank(), shuffle=True)
-            train_dataloader = DataLoader(train_dataset, batch_size=args.train_batch_size, sampler=train_sampler, collate_fn=lambda x: train_dataset.collate_fn(x, args.max_length))
-            dev_dataloader = DataLoader(dev_dataset, batch_size=args.dev_batch_size, sampler=dev_sampler, collate_fn=lambda x: dev_dataset.collate_fn(x, args.max_length))
+            train_dataloader = DataLoader(train_dataset, batch_size=args.train_batch_size, sampler=train_sampler, collate_fn=lambda x: train_dataset.collate_fn(x, args))
+            dev_dataloader = DataLoader(dev_dataset, batch_size=args.dev_batch_size, sampler=dev_sampler, collate_fn=lambda x: dev_dataset.collate_fn(x, args))
         else:
-            train_dataloader = DataLoader(train_dataset,  batch_size=args.train_batch_size, shuffle=True, collate_fn=lambda x: train_dataset.collate_fn(x, args.max_length))
-            dev_dataloader = DataLoader(dev_dataset, batch_size=args.dev_batch_size, shuffle=True, collate_fn=lambda x: dev_dataset.collate_fn(x, args.max_length))
+            train_dataloader = DataLoader(train_dataset,  batch_size=args.train_batch_size, shuffle=True, collate_fn=lambda x: train_dataset.collate_fn(x, args))
+            dev_dataloader = DataLoader(dev_dataset, batch_size=args.dev_batch_size, shuffle=True, collate_fn=lambda x: dev_dataset.collate_fn(x, args))
         loader_dict['train'] = train_dataloader
         loader_dict['dev'] = dev_dataloader
 
@@ -84,149 +88,115 @@ def attach_scheduler(args, optimizer, total_training_steps):
 
 
 
-def validate(args, dev_dataloader, model, crf_model):
+def validate(args, dev_dataloader, model):
     model.eval()
-    label_list = [
-        'O',
-        'B-MethodName', 'I-MethodName', 'B-HyperparameterName', 'I-HyperparameterName',
-        'B-HyperparameterValue', 'I-HyperparameterValue', 'B-MetricName', 'I-MetricName',
-        'B-MetricValue', 'I-MetricValue', 'B-TaskName', 'I-TaskName', 'B-DatasetName', 'I-DatasetName',
-    ]
-    correct_ones = 0
-    all_ones = 0
-    eval_losses = []
-    gth_labels = []
-    pred_labels = []
-    with torch.no_grad():
-        for data in dev_dataloader:
-            input_ids = data['input_ids'].to(args.device)
-            labels = data['labels'].to(args.device)
-            mask_ids = data['attention_mask'].to(args.device)
-            outputs = model(input_ids, labels=labels, attention_mask=mask_ids)
-            logits = outputs['logits']
-            if args.with_crf:
-                crf_tags = labels.clone()
-                crf_tags[crf_tags == -100] = 15
-                crf_emissions = F.log_softmax(logits, dim=-1)
-                eval_loss = -crf_model(crf_emissions, crf_tags, mask=mask_ids, reduction='mean')
-                preds = crf_model.decode(logits, mask=mask_ids)
-                preds = [p if p != 15 else 0 for pred in preds for p in pred]
 
-                labels = labels.view(-1).tolist()
-                mask_ids = mask_ids.view(-1).tolist()
-                refs = [label for mask_id, label in zip(mask_ids, labels) if mask_id != 0]
-                pred_labels.append(preds)
-                gth_labels.append(refs)
-            else:
-                eval_loss = outputs['loss']
-                preds = torch.argmax(logits, dim=-1)
-                pred_labels.append(preds.view(-1).tolist())
-                gth_labels.append(labels.view(-1).tolist())
+    eval_losses = []
+    refs = []
+    preds = []
+    with torch.no_grad():
+        for batch in dev_dataloader:
+            outputs = model(
+                input_ids=batch['input_ids'],
+                token_starts=batch['token_starts'],
+                labels=batch['labels'], 
+                attention_mask=batch['attention_mask'],
+            )
+            eval_loss = outputs[0]
+            logits = outputs[1]
+            pred = torch.argmax(logits, dim=-1)
+            ref = batch['labels']
             eval_losses.append(eval_loss.item()) 
+            preds.append(pred.view(-1).tolist())
+            refs.append(ref.view(-1).tolist())
+            
 
     metric = evaluate.load("seqeval")
-    true_predictions = [
-        [label_list[p] for (p, l) in zip(pred_label, gth_label) if l != -100]
-        for pred_label, gth_label in zip(pred_labels, gth_labels)
+    predictions = [
+        [args.id2entity[p] for (p, l) in zip(pred, ref) if l != -100]
+        for pred, ref in zip(preds, refs)
     ]
-    true_labels = [
-        [label_list[l] for (p, l) in zip(pred_label, gth_label) if l != -100]
-        for pred_label, gth_label in zip(pred_labels, gth_labels)
+    references = [
+        [args.id2entity[l] for (p, l) in zip(pred, ref) if l != -100]
+        for pred, ref in zip(preds, refs)
     ]
-    results = metric.compute(predictions=true_predictions, references=true_labels)
-    f1 = results['overall_f1']
+    f1 = metric.compute(predictions=predictions, references=references)['overall_f1']
 
-    print(f'validation f1 : {f1}')
     eval_loss = sum(eval_losses) / len(eval_losses)
+    
+    print(f'validation f1 : {f1}')
     print(f'validation loss : {eval_loss}')
-    model.train()
     return f1, eval_loss
 
 
-def train(args, model, crf_model, tokenizer):
+def train(args, model, tokenizer):
     best_checkpoint_name = None
     best_eval_f1 = -float('inf')
     best_eval_loss = float('inf')
-    global_step = 0
     step = 0
+    iteration = 0
     print('=====begin loading dataset====')
     loaders = load_dataset(args, tokenizer)
     print('=====end loading dataset====')
     train_dataloader = loaders['train']
     dev_dataloader = loaders['dev']
-    model.train()
-    optimizer = attach_optimizer(args, model)
     total_training_steps = len(train_dataloader) * args.num_epochs // args.gradient_accumulation_step
+    optimizer = attach_optimizer(args, model)
     scheduler = attach_scheduler(args, optimizer, total_training_steps)
+    model.train()
+    
 
     train_losses = []
     for epoch in range(args.num_epochs):
-        for data in tqdm(train_dataloader):
-            input_ids = data['input_ids'].to(args.device)
-            labels = data['labels'].to(args.device)
-            mask_ids = data['attention_mask'].to(args.device)
-            outputs = model(input_ids, labels=labels, attention_mask=mask_ids, return_dict=True)
-            if args.with_crf:
-                crf_tags = labels.clone()
-                crf_tags[crf_tags == -100] = 15
-                crf_emissions = outputs['logits'] 
-                crf_emissions = F.log_softmax(crf_emissions, dim=-1)
-                crf_mask = mask_ids
-                loss = -crf_model(crf_emissions, crf_tags, mask=crf_mask, reduction='mean')
-            else:
-                loss = outputs['loss']
+        for batch in tqdm(train_dataloader):
+            model.train()
+            outputs = model(
+                input_ids=batch['input_ids'],
+                token_starts=batch['token_starts'],
+                labels=batch['labels'], 
+                attention_mask=batch['attention_mask'],
+            )
+            loss = outputs[0]
             loss.backward()
             train_losses.append(loss.item())
             if args.use_wandb:
-                wandb.log({'train loss': loss.item()})
-            step += 1
-            if step % args.gradient_accumulation_step == 0:
+                wandb.log({'train loss': loss.item(), 'iteration': iteration})
+            iteration += 1
+            if iteration % args.gradient_accumulation_step == 0:
                 optimizer.step()
                 optimizer.zero_grad()
                 scheduler.step()
-                global_step += 1
+                step += 1
 
                 if args.use_wandb:
-                    wandb.log({'learning rate': scheduler.get_last_lr()[0], 'step': global_step})
+                    wandb.log({'learning rate': scheduler.get_last_lr()[0], 'step': step})
 
-                if global_step % args.evaluation_steps == 0:
-                    eval_f1, eval_loss = validate(args, dev_dataloader, model, crf_model)
+                if step % args.evaluation_steps == 0:
+                    eval_f1, eval_loss = validate(args, dev_dataloader, model)
                     if args.use_wandb:
-                        wandb.log({'eval_f1': eval_f1, 'step': global_step})
-                        wandb.log({'eval_loss': eval_loss, 'step': global_step})
+                        wandb.log({'eval_f1': eval_f1, 'step': step})
+                        wandb.log({'eval_loss': eval_loss, 'step': step})
                     if args.model_chosen_metric == 'f1':
                         if eval_f1 > best_eval_f1:
                             if best_checkpoint_name is not None:
                                 os.remove(best_checkpoint_name)
-                                if args.with_crf:
-                                    os.remove(best_checkpoint_name.replace('.ckpt', '_crf.ckpt'))
                                 best_checkpoint_name = args.checkpoint_save_dir + 'best_{}4{}_f1_{}_{}.ckpt'.format(args.model_name.split('/')[-1], args.task, round(eval_f1*100,3), args.timestamp)
                             else:
                                 best_checkpoint_name = args.checkpoint_save_dir + 'best_{}4{}_f1_{}_{}.ckpt'.format(args.model_name.split('/')[-1], args.task, round(eval_f1*100,3), args.timestamp)
                             model_to_save = model.module if hasattr(model, 'module') else model
                             output_model_file = best_checkpoint_name
                             torch.save(model_to_save.state_dict(), output_model_file)
-                            if args.with_crf:
-                                crf_model_to_save = crf_model.module if hasattr(crf_model, 'module') else crf_model
-                                output_crf_model_file = best_checkpoint_name.replace('.ckpt', '_crf.ckpt')
-                                torch.save(crf_model_to_save.state_dict(), output_crf_model_file)
                             best_eval_f1 = eval_f1
                     elif args.model_chosen_metric == 'loss':
                         if eval_loss < best_eval_loss:
                             if best_checkpoint_name is not None:
                                 os.remove(best_checkpoint_name)
-                                if args.with_crf:
-                                    os.remove(best_checkpoint_name.replace('.ckpt', '_crf.ckpt'))
                                 best_checkpoint_name = args.checkpoint_save_dir + 'best_{}4{}_loss_{}_{}.ckpt'.format(args.model_name.split('/')[-1], args.task, round(eval_loss,3), args.timestamp)
                             else:
                                 best_checkpoint_name = args.checkpoint_save_dir + 'best_{}4{}_loss_{}_{}.ckpt'.format(args.model_name.split('/')[-1], args.task, round(eval_loss,3), args.timestamp)
                             model_to_save = model.module if hasattr(model, 'module') else model
                             output_model_file = best_checkpoint_name
                             torch.save(model_to_save.state_dict(), output_model_file)
-                            if args.with_crf:
-                                crf_model_to_save = crf_model.module if hasattr(crf_model, 'module') else crf_model
-                                output_crf_model_file = best_checkpoint_name.replace('.ckpt', '_crf.ckpt')
-                                torch.save(crf_model_to_save.state_dict(), output_crf_model_file)
                             best_eval_loss = eval_loss
                     else:
                         raise NotImplementedError
@@ -235,70 +205,51 @@ def train(args, model, crf_model, tokenizer):
 
     src_file = best_checkpoint_name
     tgt_file = args.checkpoint_save_dir + 'best_{}4{}.ckpt'.format(args.model_name.split('/')[-1], args.task)
-    if args.with_crf:
-        src_crf_file = best_checkpoint_name.replace('.ckpt', '_crf.ckpt')
-        tgt_crf_file = args.checkpoint_save_dir + 'best_{}4{}_crf.ckpt'.format(args.model_name.split('/')[-1], args.task)
-        shutil.copy(src_crf_file, tgt_crf_file)
     shutil.copy(src_file, tgt_file)
     return
 
 
-def test(args, model, tokenizer):
-    raise NotImplementedError
-
-
-def ner_inference(args, sent, model, crf_model, tokenizer):
-    id2entity = [
-        'O',
-        'B-MethodName', 'I-MethodName', 'B-HyperparameterName', 'I-HyperparameterName',
-        'B-HyperparameterValue', 'I-HyperparameterValue', 'B-MetricName', 'I-MetricName',
-        'B-MetricValue', 'I-MetricValue', 'B-TaskName', 'I-TaskName', 'B-DatasetName', 'I-DatasetName',
-    ]
-
+def ner_inference(args, sent, model, tokenizer):
     tokenized_sent = tokenizer.tokenize(sent)
     input_ids = tokenizer.encode(sent)
-    input_ids = torch.tensor([input_ids]).to(args.device)
-    outputs = model(input_ids=input_ids)
-    logits = outputs['logits']
+    token_starts = [0] + [1 - int(token.startswith('##')) for token in tokenized_sent] + [0]
+    input_ids = torch.LongTensor([input_ids])
+    input_ids = input_ids[:, :args.max_length].to(args.device)
+    token_starts = torch.ByteTensor([token_starts])
+    token_starts = token_starts[:, :args.max_length].to(args.device)
+    outputs = model(
+        input_ids=input_ids,
+        token_starts=token_starts,
+    )
+    logits = outputs[-1]
     entities = []
     words = []
-    if args.with_crf:
-        mask_ids = torch.tensor([[True] * logits.size(1)]).to(args.device)
-        preds = crf_model.decode(logits, mask=mask_ids)[0][1:-1]
+    preds = torch.argmax(logits, dim=-1)[0].tolist()
 
-        index = 0
-        for token in tokenized_sent:
-            entity = id2entity[preds[index]]
-            index += 1
-            if 'I-' in entity and (len(entities) == 0 or entities[-1] == 'O'):
-                entity = entity.replace('I-', 'B-')
-            entities.append(entity)
+    token_starts = [1 - int(token.startswith('##')) for token in tokenized_sent]
+    for token_start, token in zip(token_starts, tokenized_sent):
+        if token_start == 0:
+            entities.append('O')
             words.append(token.replace('##', ''))
-    else:
-        preds = torch.argmax(logits, dim=-1)[0].tolist()
-        for pred, token in zip(preds, tokenized_sent):
-            entity = id2entity[pred]
-            if 'I-' in entity and (len(entities) == 0 or entities[-1] == 'O'):
-                entity = entity.replace('I-', 'B-')
-            entities.append(entity)
-            words.append(token.replace('##', ''))
-        assert len(entities) == len(words)
+        else:
+            entities.append(args.id2entity[preds.pop(0)])
+            words.append(token)
+
+    assert len(entities) == len(words)
     return words, entities
 
 
 
-def sciner_inference(args, model, crf_model, tokenizer):
-    model.load_state_dict(torch.load(args.checkpoint_save_dir + 'best_{}4{}.ckpt'.format(args.model_name.split('/')[-1], args.task)))
-    if args.with_crf:
-        crf_model.load_state_dict(torch.load(args.checkpoint_save_dir + 'best_{}4{}_crf.ckpt'.format(args.model_name.split('/')[-1], args.task)))
+def sciner_inference(args, model, tokenizer):
+    def unk_wrapper(word):
+        return tokenizer.decode(tokenizer.encode(word), skip_special_tokens=True)
 
+    model.load_state_dict(torch.load(args.checkpoint_save_dir + 'best_{}4{}.ckpt'.format(args.model_name.split('/')[-1], args.task)))
     with open(args.output_file, 'w', newline='') as output_f, open(args.inference_file, 'r') as input_f:
         sents = input_f.readlines()
         for sent in tqdm(sents):
-            def unk_wrapper(word):
-                return tokenizer.decode(tokenizer.encode(word), skip_special_tokens=True)
             words = sent.strip().split(' ')
-            src_words, src_entities = ner_inference(args, sent, model, crf_model, tokenizer)
+            src_words, src_entities = ner_inference(args, sent, model, tokenizer)
             tgt_words = []
             tgt_entities = []
             src_index = 0
@@ -356,13 +307,18 @@ if __name__ == '__main__':
     parser.add_argument('--seed', type=int, default=42)
     parser.add_argument('--device', type=str, default='cuda')
     parser.add_argument('--dataset', type=str, default='sciner')
-    parser.add_argument('--label_num', type=int, default=15, help='number of labels, 15 for sciner, 9 for scirex')
     parser.add_argument('--train', action='store_true')
     parser.add_argument('--inference', action='store_true')
     parser.add_argument('--local_rank', type=int, default=-1)
     parser.add_argument('--evaluation_steps', type=int, default=50)
     parser.add_argument('--use_wandb', action='store_true')
-    parser.add_argument('--with_crf', action='store_true')
+    parser.add_argument('--model_type', type=str, default='bertsoftmax', choices=['bertsoftmax', 'bertbilstmcrf', 'bertcrf'])
+    parser.add_argument('-n', '--id2entity', nargs='+', default=[
+        'O',
+        'B-MethodName', 'I-MethodName', 'B-HyperparameterName', 'I-HyperparameterName',
+        'B-HyperparameterValue', 'I-HyperparameterValue', 'B-MetricName', 'I-MetricName',
+        'B-MetricValue', 'I-MetricValue', 'B-TaskName', 'I-TaskName', 'B-DatasetName', 'I-DatasetName',
+    ])
 
     args = parser.parse_args()
     if torch.cuda.device_count() > 1:
@@ -382,32 +338,28 @@ if __name__ == '__main__':
         wandb.init(project="SciNER")
 
     tokenizer = AutoTokenizer.from_pretrained(args.model_name)
-    config = AutoConfig.from_pretrained(args.model_name, num_labels=args.label_num)
-    model = AutoModelForTokenClassification.from_pretrained(args.model_name, config=config, ignore_mismatched_sizes=True)
-
+    config = AutoConfig.from_pretrained(args.model_name, num_labels=len(args.id2entity))
     device = torch.device(args.local_rank) if args.local_rank != -1 else torch.device('cuda')
-    
-    if args.with_crf:
-        crf_model = CRF(args.label_num, batch_first=True).to(args.device)
-    else:
-        crf_model = None
+    if args.model_type == 'bertsoftmax':
+            model = BertSoftmax.from_pretrained(args.model_name, config=config, ignore_mismatched_sizes=True)
+    elif args.model_type == 'bertbilstmcrf':
+            model = BertBiLSTMCRF.from_pretrained(args.model_name, config=config, ignore_mismatched_sizes=True)
+    elif args.model_type == 'bertcrf':
+            model = BertCRF.from_pretrained(args.model_name, config=config, ignore_mismatched_sizes=True)
+    model.to(device)
     
     if args.load_from_checkpoint:
         model_dict = torch.load(args.load_from_checkpoint)
         filtered_model_dict = {k: v for k, v in model_dict.items() if 'classifier' not in k}
         model_dict.update(filtered_model_dict)
         model.load_state_dict(filtered_model_dict, strict=False)
-        if args.with_crf:
-            crf_dict = torch.load(args.load_from_checkpoint.replace('.ckpt', '_crf.ckpt'))
-            crf_model.load_state_dict(crf_dict)
     
-    model.to(device)
     
     if torch.cuda.device_count() > 1:
         distributed_setup(args, model)
         model = torch.nn.parallel.DistributedDataParallel(model, device_ids=[args.local_rank], output_device=args.local_rank)
 
     if args.train:
-        train(args, model, crf_model, tokenizer)
+        train(args, model, tokenizer)
     elif args.inference:
-        conll_result = sciner_inference(args, model, crf_model, tokenizer)
+        conll_result = sciner_inference(args, model, tokenizer)

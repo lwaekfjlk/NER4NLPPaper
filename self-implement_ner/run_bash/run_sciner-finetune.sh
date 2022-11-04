@@ -16,7 +16,6 @@ python -m torch.distributed.launch --nproc_per_node=$NGPU --master_port 29519 ..
 --dev_batch_size 8 \
 --max_length 512 \
 --num_epochs 30 \
+--model_type bertbilstmcrf \
 --learning_rate 5e-5 \
---label_num 16 \
---with_crf \
 --evaluation_steps 50
