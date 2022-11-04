@@ -3,6 +3,8 @@ export NGPU=1
 python -m torch.distributed.launch --nproc_per_node=$NGPU --master_port 29519 ../main.py \
 --train \
 --use_wandb \
+--model_type bert \
+--model_name allenai/scibert_scivocab_uncased \
 --dataset sciner \
 --train_file ../data/sciner_dataset/train.conll \
 --dev_file ../data/sciner_dataset/validation.conll \
@@ -11,10 +13,10 @@ python -m torch.distributed.launch --nproc_per_node=$NGPU --master_port 29519 ..
 --task sciner-finetune \
 --train_batch_size 8 \
 --gradient_accumulation_step 1 \
+--model_chosen_metric f1 \
 --dev_batch_size 8 \
 --max_length 512 \
---num_epochs 30 \
---learning_rate 1e-4 \
---label_num 15 \
+--num_epochs 50 \
+--learning_rate 2e-5 \
 --evaluation_steps 50 \
---load_from_checkpoint ../checkpoints/best_model4scirex-finetune.ckpt
+--load_from_ckpt ../checkpoints/best_model4scirex-finetune.ckpt

@@ -6,30 +6,50 @@ import csv
 import shutil
 import evaluate
 import logging
+import wandb
 import torch.distributed as dist
 import torch.nn.functional as F
 from tqdm import tqdm, trange
 from transformers import AutoTokenizer, AutoConfig
 from transformers import AdamW, get_cosine_schedule_with_warmup
-from utils.dataset import ScirexDataset, SciNERDataset
+from dataset import ScirexDataset, SciNERDataset
 from torch.utils.data import DataLoader
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torchcrf import CRF
-from model import BertCRF, BertBiLSTMCRF, BertSoftmax
+from model import BertCRF, BertBiLSTMCRF, Bert
 
 import warnings
 warnings.filterwarnings('ignore')
+
+
+def set_seed(args):
+    os.environ['PYTHONHASHSEED'] = str(args.seed)
+    torch.manual_seed(args.seed)
+    torch.cuda.manual_seed(args.seed)
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = True
+
+
+def set_wandb(args):
+    if args.use_wandb:
+        # need to change to your own API when using
+        os.environ['EXP_NUM'] = 'SciNER'
+        os.environ['WANDB_NAME'] = args.timestamp
+        os.environ['WANDB_API_KEY'] = '972035264241fb0f6cc3cab51a5d82f47ca713db'
+        os.environ['WANDB_DIR'] = '../SciNER_tmp'
+        wandb.init(project="SciNER")
+    return
 
 
 def attach_dataloader(args, tokenizer):
     loader_dict = {}
     if args.train:
         if args.dataset == 'scirex':
-            train_dataset = ScirexDataset(args.train_file, tokenizer)
-            dev_dataset = ScirexDataset(args.dev_file, tokenizer)
+            train_dataset = ScirexDataset(args, tokenizer, 'train')
+            dev_dataset = ScirexDataset(args, tokenizer, 'dev')
         elif args.dataset == 'sciner':
-            train_dataset = SciNERDataset(args.train_file, tokenizer)
-            dev_dataset = SciNERDataset(args.dev_file, tokenizer)
+            train_dataset = SciNERDataset(args, tokenizer, 'train')
+            dev_dataset = SciNERDataset(args, tokenizer, 'dev')
         else:
             raise ValueError('Invalid dataset')
         if torch.cuda.device_count() > 1:
@@ -75,9 +95,9 @@ def attach_dataloader(args, tokenizer):
 
     if args.inference:
         if args.dataset == 'scirex':
-            test_dataset = ScirexDataset(args.test_file, tokenizer)
+            test_dataset = ScirexDataset(args, tokenizer, 'test')
         elif args.dataset == 'sciner':
-            test_dataset = SciNERDataset(args.test_file, tokenizer)
+            test_dataset = SciNERDataset(args, tokenizer, 'test')
         else:
             raise ValueError('Invalid dataset')
         test_dataloader = DataLoader(
@@ -91,10 +111,14 @@ def attach_dataloader(args, tokenizer):
     return loader_dict
 
 
+def attach_tokenizer(args):
+    return AutoTokenizer.from_pretrained(args.model_name)
+
+
 def attach_model(args):
     config = AutoConfig.from_pretrained(args.model_name, num_labels=len(args.id2entity))
-    if args.model_type == 'bertsoftmax':
-        model = BertSoftmax.from_pretrained(
+    if args.model_type == 'bert':
+        model = Bert.from_pretrained(
             args.model_name, 
             config=config, 
             ignore_mismatched_sizes=True
@@ -122,7 +146,7 @@ def attach_model(args):
         model_dict = torch.load(args.load_from_ckpt)
         bert_model_dict = {k: v for k, v in model_dict.items() if 'classifier' not in k}
         model_dict.update(bert_model_dict)
-        model.load_state_dict(filtered_model_dict, strict=False)
+        model.load_state_dict(bert_model_dict, strict=False)
 
     if torch.cuda.device_count() > 1:
         distributed_setup(args, model)
@@ -291,7 +315,7 @@ def train(args, model, tokenizer):
                     best_ckpt_name, best_metric = save_model(best_ckpt_name, metric, best_metric)
                     logging.info('eval f1 : {}'.format(metric['f1']))
                     logging.info('eval loss : {}'.format(metric['loss']))
-            
+
                     if args.use_wandb:
                         wandb.log({'train loss': sum(step_losses)/len(step_losses), 'step': step})
                         wandb.log({'learning rate': scheduler.get_last_lr()[0], 'step': step})
@@ -303,7 +327,7 @@ def train(args, model, tokenizer):
     return
 
 
-def ner_inference(args, sent, model, tokenizer):
+def ner_pipeline(args, sent, model, tokenizer):
     tokenized_sent = tokenizer.tokenize(sent)
     input_ids = tokenizer.encode(sent)
     token_starts = [0] + [1 - int(token.startswith('##')) for token in tokenized_sent] + [0]
@@ -333,20 +357,19 @@ def ner_inference(args, sent, model, tokenizer):
     return words, entities
 
 
-
 def inference(args, model, tokenizer):
     def unk_wrapper(word):
         return tokenizer.decode(tokenizer.encode(word), skip_special_tokens=True)
 
     model.load_state_dict(
         torch.load(
-            os.join(args.ckpt_save_dir, 'best_{}4{}.ckpt'.format(args.model_type, args.task))
+            os.path.join(args.ckpt_save_dir, 'best_{}4{}.ckpt'.format(args.model_type, args.task))
     ))
     with open(args.output_file, 'w', newline='') as output_f, open(args.inference_file, 'r') as input_f:
         sents = input_f.readlines()
         for sent in tqdm(sents):
             words = sent.strip().split(' ')
-            src_words, src_entities = ner_inference(args, sent, model, tokenizer)
+            src_words, src_entities = ner_pipeline(args, sent, model, tokenizer)
             tgt_words = []
             tgt_entities = []
             src_index = 0
@@ -370,9 +393,6 @@ def inference(args, model, tokenizer):
 
 
 def distributed_setup(args, model):
-    '''
-    setup distributed training
-    '''
     torch.cuda.set_device(args.local_rank)
     torch.distributed.init_process_group(backend='nccl')
     args.device = torch.device('cuda', args.local_rank)
@@ -381,7 +401,7 @@ def distributed_setup(args, model):
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--timestamp', type=str, default=time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(round(time.time()*1000))/1000)))
-    parser.add_argument('--model_type', type=str, default='bertsoftmax', choices=['bertsoftmax', 'bertbilstmcrf', 'bertcrf'])
+    parser.add_argument('--model_type', type=str, default='bert', choices=['bert', 'bertbilstmcrf', 'bertcrf'])
     parser.add_argument('--model_name', type=str, default='allenai/scibert_scivocab_uncased', help='model name or path')
     parser.add_argument('--train_file', type=str, default='./data/sciner_dataset/train.conll', help='path to train file, jsonl for scirex, conll for sciner')
     parser.add_argument('--dev_file', type=str, default='./data/sciner_dataset/validation.conll', help='path to dev file')
@@ -418,21 +438,11 @@ if __name__ == '__main__':
         'B-MetricValue', 'I-MetricValue', 'B-TaskName', 'I-TaskName', 'B-DatasetName', 'I-DatasetName',
     ])
     args = parser.parse_args()
+    set_seed(args)
+    set_wandb(args)
 
 
-    if args.use_wandb:
-        import wandb
-        # need to change to your own API when using
-        os.environ['EXP_NUM'] = 'SciNER'
-        os.environ['WANDB_NAME'] = time.strftime(
-            '%Y-%m-%d %H:%M:%S', 
-            time.localtime(int(round(time.time()*1000))/1000)
-        )
-        os.environ['WANDB_API_KEY'] = '972035264241fb0f6cc3cab51a5d82f47ca713db'
-        os.environ['WANDB_DIR'] = '../SciNER_tmp'
-        wandb.init(project="SciNER")
-
-    tokenizer = AutoTokenizer.from_pretrained(args.model_name)
+    tokenizer = attach_tokenizer(args)
     model = attach_model(args)
 
     if args.train:

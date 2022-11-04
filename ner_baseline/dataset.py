@@ -5,20 +5,19 @@ from torch.nn.utils.rnn import pad_sequence
 
 
 class SciNERDataset(Dataset):
-    def __init__(self, file, tokenizer, sep=' -X- _ '):
-        entities = [
-            'O',
-            'B-MethodName', 'I-MethodName', 'B-HyperparameterName', 'I-HyperparameterName',
-            'B-HyperparameterValue', 'I-HyperparameterValue', 'B-MetricName', 'I-MetricName',
-            'B-MetricValue', 'I-MetricValue', 'B-TaskName', 'I-TaskName', 'B-DatasetName', 'I-DatasetName',
-            'X',
-        ]
+    def __init__(self, args, tokenizer, split, sep=' -X- _ '):
         self.tokenizer = tokenizer
-        self.entity2id = {e: i for i, e in enumerate(entities)}
-        self.id2entity = {i: e for i, e in enumerate(entities)}
+        self.entity2id = {e: i for i, e in enumerate(self.args.id2entity)}
+        self.id2entity = {i: e for i, e in enumerate(self.args.id2entity)}
         self.cls = self.tokenizer.cls_token_id
         self.sep = self.tokenizer.sep_token_id
         self.pad = self.tokenizer.pad_token_id
+        if split == 'test':
+            file = args.test_file
+        elif split == 'dev':
+            file = args.dev_file
+        elif split == 'train':
+            file = args.train_file
         self.data = self._read_conll_file(file, sep)
 
 
@@ -27,16 +26,16 @@ class SciNERDataset(Dataset):
             lines = f.readlines()
 
         data = []
-        sentence = []
+        sent = []
 
         for l in lines:
             l = l.strip()
             if len(l) == 0:
-                instance = self._create_example(sentence, sep=sep)
+                instance = self._create_example(sent, sep=sep)
                 data.append(instance)
-                sentence = []
+                sent = []
             else:
-                sentence.append(l)
+                sent.append(l)
         return data
 
     def _create_example(self, conll_sentence, sep=' -X- _ '):

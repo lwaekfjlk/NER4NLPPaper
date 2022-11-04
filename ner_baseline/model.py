@@ -3,9 +3,9 @@ from torch.nn.utils.rnn import pad_sequence
 from torchcrf import CRF
 
 
-class BertSoftmax(BertPreTrainedModel):
+class Bert(BertPreTrainedModel):
     def __init__(self, config):
-        super(BertSoftmax, self).__init__(config)
+        super(Bert, self).__init__(config)
         self.num_labels = config.num_labels
 
         self.bert = BertModel(config)
@@ -52,6 +52,7 @@ class BertSoftmax(BertPreTrainedModel):
         # contain: (loss), scores
         return outputs
 
+
 class BertBiLSTMCRF(BertPreTrainedModel):
     def __init__(self, config):
         super(BertBiLSTMCRF, self).__init__(config)
@@ -60,7 +61,7 @@ class BertBiLSTMCRF(BertPreTrainedModel):
         self.bert = BertModel(config)
         self.dropout = nn.Dropout(config.hidden_dropout_prob)
         self.bilstm = nn.LSTM(
-            input_size=768,  # 1024
+            input_size=config.hidden_size,  # 1024
             hidden_size=config.hidden_size // 2,  # 1024
             batch_first=True,
             num_layers=2,
@@ -101,6 +102,7 @@ class BertBiLSTMCRF(BertPreTrainedModel):
         # contain: (loss), scores
         return outputs
 
+
 class BertCRF(BertPreTrainedModel):
     def __init__(self, config):
         super(BertCRF, self).__init__(config)
@@ -140,6 +142,7 @@ class BertCRF(BertPreTrainedModel):
 
         # contain: (loss), scores
         return outputs
+
 
 class BiLSTM_CRF(nn.Module):
 
