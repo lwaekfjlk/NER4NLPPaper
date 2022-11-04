@@ -128,10 +128,10 @@ dmypy.json
 .pyre/
 
 # own files
-self-implement_ner/raw_data/
-self-implement_ner/data/
-self-implement_ner/checkpoints/
-self-implement_ner/SciNER_tmp/
+ner_baseline/raw_data/
+ner_baseline/data/
+ner_baseline/checkpoints/
+ner_baseline/SciNER_tmp/
 *.out
 *.slurm
 *.err

@@ -7,7 +7,7 @@ python -m torch.distributed.launch --nproc_per_node=$NGPU --master_port 29519 ..
 --train_file ../data/scirex_dataset/train.jsonl \
 --dev_file ../data/scirex_dataset/dev.jsonl \
 --test_file ../data/scirex_dataset/test.jsonl \
---checkpoint_save_dir ../checkpoints/ \
+--ckpt_save_dir ../checkpoints/ \
 --task scirex-finetune \
 --train_batch_size 8 \
 --gradient_accumulation_step 1 \
