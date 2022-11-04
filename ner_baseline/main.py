@@ -12,7 +12,7 @@ import torch.nn.functional as F
 from tqdm import tqdm, trange
 from transformers import AutoTokenizer, AutoConfig
 from transformers import AdamW, get_cosine_schedule_with_warmup
-from dataset import ScirexDataset, SciNERDataset
+from dataset import SciNERDataset
 from torch.utils.data import DataLoader
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torchcrf import CRF
@@ -44,14 +44,8 @@ def set_wandb(args):
 def attach_dataloader(args, tokenizer):
     loader_dict = {}
     if args.train:
-        if args.dataset == 'scirex':
-            train_dataset = ScirexDataset(args, tokenizer, 'train')
-            dev_dataset = ScirexDataset(args, tokenizer, 'dev')
-        elif args.dataset == 'sciner':
-            train_dataset = SciNERDataset(args, tokenizer, 'train')
-            dev_dataset = SciNERDataset(args, tokenizer, 'dev')
-        else:
-            raise ValueError('Invalid dataset')
+        train_dataset = SciNERDataset(args, tokenizer, 'train')
+        dev_dataset = SciNERDataset(args, tokenizer, 'dev')
         if torch.cuda.device_count() > 1:
             train_sampler = torch.utils.data.distributed.DistributedSampler(
                 train_dataset, 
@@ -94,12 +88,7 @@ def attach_dataloader(args, tokenizer):
         loader_dict['dev'] = dev_dataloader
 
     if args.inference:
-        if args.dataset == 'scirex':
-            test_dataset = ScirexDataset(args, tokenizer, 'test')
-        elif args.dataset == 'sciner':
-            test_dataset = SciNERDataset(args, tokenizer, 'test')
-        else:
-            raise ValueError('Invalid dataset')
+        test_dataset = SciNERDataset(args, tokenizer, 'test')
         test_dataloader = DataLoader(
             test_dataset, 
             batch_size=args.test_batch_size, 
@@ -403,12 +392,12 @@ if __name__ == '__main__':
     parser.add_argument('--timestamp', type=str, default=time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(round(time.time()*1000))/1000)))
     parser.add_argument('--model_type', type=str, default='bert', choices=['bert', 'bertbilstmcrf', 'bertcrf'])
     parser.add_argument('--model_name', type=str, default='allenai/scibert_scivocab_uncased', help='model name or path')
-    parser.add_argument('--train_file', type=str, default='./data/sciner_dataset/train.conll', help='path to train file, jsonl for scirex, conll for sciner')
+    parser.add_argument('--train_file', type=str, default='./data/sciner_dataset/train.conll', help='path to train file, conll for sciner')
     parser.add_argument('--dev_file', type=str, default='./data/sciner_dataset/validation.conll', help='path to dev file')
     parser.add_argument('--test_file', type=str, default='./data/sciner_dataset/validation.conll', help='path to test file')
     parser.add_argument('--inference_file', type=str, default='./data/anlp_test/anlp-sciner-test.txt', help='final ANLP submission file')
     parser.add_argument('--output_file', type=str, default='./data/anlp_test/anlp_haofeiy_sciner.conll')
-    parser.add_argument('--task', type=str, default='sciner-finetune', choices=['sciner-finetune', 'scirex-finetune'])
+    parser.add_argument('--task', type=str, default='sciner-finetune', choices=['sciner-finetune'])
     parser.add_argument('--load_from_ckpt', type=str, default=None, help='contine finetuning based on one ckpt')
     parser.add_argument('--model_chosen_metric', type=str, default='f1', help='choose dev ckpt based on this metric')
     parser.add_argument('--ckpt_save_dir', type=str, default='./checkpoints/')
