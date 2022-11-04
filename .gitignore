@@ -129,7 +129,7 @@ dmypy.json
 
 # own files
 ner_baseline/raw_data/
-ner_baseline/data/
+ner_baseline/data/scirex_dataset/
 ner_baseline/checkpoints/
 ner_baseline/SciNER_tmp/
 *.out
