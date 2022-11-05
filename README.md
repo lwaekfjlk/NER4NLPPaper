@@ -26,16 +26,9 @@ We tested on the officially released test data [here](https://github.com/neubig/
 
 The whole dataset creation pipeline can be divided into three stages: raw data collection, sentence pre-annotation and selection, and human annotation. Details and implementation can be seen in the [dataset_collection](https://github.com/lwaekfjlk/NER4NLPPaper/tree/main/dataset_collection) part.
 
-| Entity Type           | #Total |
-| --------------------- | ------ |
-| `DatasetName`         | 430    |
-| `TaskName`            | 347    |
-| `MethodName`          | 601    |
-| `MetricName`          | 254    |
-| `MetricValue`         | 266    |
-| `HyperparameterName`  | 300    |
-| `HyperparameterValue` | 342    |
-|                       |        |
+| Entity Type | `DatasetName` | `TaskName` | `MethodName` | `MetricName` | `MetricValue` | `HyperparameterName` | `HyperparameterValue` |
+| ----------- | ------------- | ---------- | ------------ | ------------ | ------------- | -------------------- | --------------------- |
+| #Total      | 430           | 347        | 601          | 254          | 266           | 300                  | 342                   |
 
 ## Code
 
