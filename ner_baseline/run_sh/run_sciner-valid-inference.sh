@@ -2,7 +2,7 @@ export CUDA_VISIBLE_DEVICES=1
 python ../main.py \
 --inference \
 --task sciner-finetune \
---model_type bertbilstmcrf \
+--model_type bertcrf \
 --model_name allenai/scibert_scivocab_uncased \
 --dataset sciner \
 --train_file ../data/sciner_dataset/train.conll \

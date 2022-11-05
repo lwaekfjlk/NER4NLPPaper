@@ -113,32 +113,20 @@ def attach_model(args):
             config=config, 
             ignore_mismatched_sizes=True
         )
-    elif args.model_type == 'bertbilstmcrf':
-        model = BertBiLSTMCRF.from_pretrained(
-            args.model_name, 
-            config=config, 
-            ignore_mismatched_sizes=True
-        )
     elif args.model_type == 'bertcrf':
         model = BertCRF.from_pretrained(
             args.model_name, 
             config=config, 
             ignore_mismatched_sizes=True
         )
-
-    if torch.cuda.device_count() > 1:
-        args.local_rank = int(os.environ['LOCAL_RANK'])
-
-    device = torch.device(args.local_rank) if args.local_rank != -1 else torch.device('cuda')
-    model.to(device)
-
-    if args.local_rank != -1:
-        set_distributed(args, model)
-        model = torch.nn.parallel.DistributedDataParallel(
-            model, 
-            device_ids=[args.local_rank], 
-            output_device=args.local_rank
+    elif args.model_type == 'bertbilstmcrf':
+        model = BertBiLSTMCRF.from_pretrained(
+            args.model_name, 
+            config=config, 
+            ignore_mismatched_sizes=True
         )
+    device = torch.device('cuda')
+    model.to(device)
 
     if args.load_from_ckpt:
         model_dict = torch.load(args.load_from_ckpt)
@@ -165,12 +153,12 @@ def attach_optimizer(args, model):
         ]
         if args.model_type == 'bertcrf':
             optimizer_grouped_parameters += [
-                {'params': model.crf.parameters(), 'lr': args.learning_rate * 10},
+                {'params': model.crf.parameters(), 'lr': args.crf_learning_rate},
             ]
         elif args.model_type == 'bertbilstmcrf':
             lstm_optimizer = list(model.bilstm.named_parameters())
             optimizer_grouped_parameters += [
-                {'params': model.crf.parameters(), 'lr': args.learning_rate * 5},
+                {'params': model.crf.parameters(), 'lr': args.crf_learning_rate},
                 {'params': [p for n, p in lstm_optimizer if not any(nd in n for nd in no_decay)],
                 'lr': args.learning_rate * 5, 'weight_decay': args.weight_decay},
                 {'params': [p for n, p in lstm_optimizer if any(nd in n for nd in no_decay)],
@@ -347,6 +335,10 @@ def ner_pipeline(args, sent, model, tokenizer):
     if args.model_type == 'bert':
         preds = torch.argmax(logits, dim=-1)[0].tolist()
     else:
+        # since our training data has much denser label
+        # while testing data has much sparser label
+        # we want to modify the logits to increase the rate of "O" label
+        logits[:, :, 0] += 7
         preds = model.crf.decode(logits)[0]
 
     token_starts = [1 - int(token.startswith('##')) for token in tokenized_sent]
@@ -397,12 +389,6 @@ def inference(args, model, tokenizer):
     return
 
 
-def set_distributed(args, model):
-    torch.cuda.set_device(args.local_rank)
-    torch.distributed.init_process_group(backend='nccl')
-    args.device = torch.device('cuda', args.local_rank)
-
-
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--timestamp', type=str, default=time.strftime('%Y-%m-%d %H:%M:%S', time.localtime(int(round(time.time()*1000))/1000)))
@@ -424,6 +410,7 @@ if __name__ == '__main__':
     parser.add_argument('--max_length', type=int, default=512)
     parser.add_argument('--num_epochs', type=int, default=10)
     parser.add_argument('--learning_rate', type=float, default=5e-5)
+    parser.add_argument('--crf_learning_rate', type=float, default=5e-2)
     parser.add_argument('--optimizer_type', type=str, default='adamw')
     parser.add_argument('--scheduler_type', type=str, default='cosine')
     parser.add_argument('--seed', type=int, default=42)
@@ -431,7 +418,6 @@ if __name__ == '__main__':
     parser.add_argument('--dataset', type=str, default='sciner')
     parser.add_argument('--train', action='store_true')
     parser.add_argument('--inference', action='store_true')
-    parser.add_argument('--local_rank', type=int, default=-1)
     parser.add_argument('--evaluation_steps', type=int, default=50)
     parser.add_argument('--use_wandb', action='store_true')
     parser.add_argument('--max_norm', type=float, default=5.0)

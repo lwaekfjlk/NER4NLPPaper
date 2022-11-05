@@ -3,7 +3,7 @@ experiments	O
 on	O
 two	O
 major	O
-triple-to-text	B-TaskName
+triple-to-text	O
 datasets-WebNLG	O
 and	O
 E2E-show	B-DatasetName
@@ -78,7 +78,7 @@ also	O
 bring	O
 down	O
 the	O
-PPL.	O
+PPL.	B-MetricName
 
 The	O
 data	O
@@ -89,9 +89,9 @@ the	O
 same	O
 for	O
 both	O
-XGPT-C	B-DatasetName
+XGPT-C	B-MethodName
 and	O
-XPyMT5,	B-DatasetName
+XPyMT5,	B-MethodName
 and	O
 consists	O
 of	O
@@ -118,7 +118,7 @@ were	O
 successfully	O
 fixed	O
 by	O
-lib2to3.	O
+lib2to3.	B-MethodName
 
 In	O
 future	O
@@ -130,7 +130,7 @@ further	O
 test	O
 our	O
 proposed	O
-typos-aware	B-TaskName
+typos-aware	O
 training	O
 with	O
 more	O
@@ -204,9 +204,9 @@ the	O
 proposed	O
 metrics,	O
 based	O
-on	B-TaskName
-Question	I-TaskName
-Answering,	I-TaskName
+on	O
+Question	O
+Answering,	O
 favorably	O
 compares	O
 to	O
@@ -288,14 +288,14 @@ results	O
 on	O
 the	O
 miniRCV1	B-DatasetName
-and	B-DatasetName
-ODIC	I-DatasetName
+and	O
+ODIC	B-DatasetName
 dataset,	O
 improving	O
 the	O
 best	O
 performance	O
-(accuracy)	B-MetricName
+(accuracy)	O
 by	O
 2∼4%.	B-MetricValue
 
@@ -340,7 +340,7 @@ for	O
 which	O
 we	O
 use	O
-Babelfy	B-DatasetName
+Babelfy	B-MethodName
 (Moro	O
 et	O
 al,	O
@@ -353,7 +353,7 @@ English	O
 preprocessing	O
 pipeline,	O
 the	O
-Stanza	B-DatasetName
+Stanza	B-MethodName
 Toolkit	O
 (Qi	O
 et	O
@@ -388,15 +388,15 @@ generated	O
 headlines	O
 from	O
 a	O
-pointer	O
-generator	O
+pointer	B-MethodName
+generator	I-MethodName
 (See	O
 et	O
 al,	O
 2017)	O
 model	O
 trained	O
-on	O
+on	B-DatasetName
 LCSTS	I-DatasetName
 dataset	O
 (Hu	O
@@ -546,10 +546,10 @@ propose	O
 two	O
 additional	O
 variations	O
-of	O
-stance	B-TaskName
+of	B-TaskName
+stance	I-TaskName
 detection:	I-TaskName
-zero-shot	B-TaskName
+zero-shot	O
 stance	I-TaskName
 detection	I-TaskName
 (a	O
@@ -565,7 +565,7 @@ completely	O
 new	O
 topics)	O
 and	O
-few-shot	B-TaskName
+few-shot	O
 stance	I-TaskName
 detection	I-TaskName
 (a	O
@@ -628,7 +628,7 @@ several	B-TaskName
 Natural	I-TaskName
 Language	I-TaskName
 Processing	I-TaskName
-(NLP)	B-TaskName
+(NLP)	O
 applications,	O
 inter	O
 alia,	O
@@ -647,7 +647,7 @@ Vlachos,	O
 et	O
 al,	O
 2018),	O
-paraphrase	B-TaskName
+paraphrase	I-TaskName
 detection	I-TaskName
 (Issa	O
 et	O
@@ -676,14 +676,14 @@ al,	O
 
 In	O
 particular,	O
-PROC-B	B-DatasetName
+PROC-B	B-MethodName
 (Glavaš	O
 et	O
 al,	O
 2019),	O
 a	O
-supervised	O
-CLWE	B-MethodName
+supervised	B-TaskName
+CLWE	I-TaskName
 framework	O
 that	O
 simply	O
@@ -714,9 +714,9 @@ cross-lingual	B-TaskName
 transfer	I-TaskName
 for	O
 NLI	B-TaskName
-and	B-TaskName
-information	I-TaskName
-retrieval.	I-TaskName
+and	O
+information	O
+retrieval.	O
 
 Moreover,	O
 when	O
@@ -739,8 +739,8 @@ objective	O
 CHAN	O
 remains),	O
 the	O
-joint	O
-accuracy	B-MetricName
+joint	B-MetricName
+accuracy	I-MetricName
 decreases	O
 by	O
 1.55%.	B-MetricValue
@@ -785,7 +785,7 @@ implicated	O
 in	O
 the	O
 predictions	O
-BERT	B-MethodName
+BERT	O
 makes	O
 at	O
 inference	O
@@ -822,7 +822,7 @@ use	O
 pretrained	O
 300-dimensional	B-HyperparameterValue
 Glove	B-MethodName
-3	O
+3	I-MethodName
 vectors	O
 (Pennington	O
 et	O
@@ -852,7 +852,7 @@ the	O
 parent-child	B-TaskName
 tasks	O
 over	O
-BERT,	B-MethodName
+BERT,	B-DatasetName
 respectively.	O
 
 Still	O
@@ -889,7 +889,7 @@ improvements	O
 obtained	O
 by	O
 the	O
-∞-former	O
+∞-former	B-MethodName
 are	O
 larger	O
 on	O
@@ -989,7 +989,7 @@ be	O
 We	O
 find	O
 that	O
-ESCHER	B-MethodName
+ESCHER	O
 predictions	O
 have	O
 an	O
@@ -1039,8 +1039,8 @@ the	O
 dataset	O
 (the	O
 vocabulary,	O
-size	O
-V	O
+size	B-HyperparameterName
+V	B-HyperparameterName
 )	O
 and	O
 encode	O
@@ -1051,7 +1051,7 @@ the	O
 dataset	O
 into	O
 a	O
-bag-of-words	O
+bag-of-words	B-MethodName
 (BoW)	B-MethodName
 representation	O
 (Joachims,	O
@@ -1230,7 +1230,7 @@ low	O
 training	O
 data,	O
 with	O
-samples	O
+samples	B-HyperparameterName
 in	O
 order	O
 of	O
@@ -1242,7 +1242,7 @@ Compared	O
 to	O
 the	O
 KL	B-MetricName
-analysis	O
+analysis	I-MetricName
 which	O
 focuses	O
 on	O
@@ -1253,8 +1253,8 @@ of	O
 the	O
 algorithms,	O
 the	O
-human	B-MetricName
-evaluation	I-MetricName
+human	B-MethodName
+evaluation	I-MethodName
 highlights	O
 the	O
 realizable	O
@@ -1344,13 +1344,13 @@ knowledge	O
 bases	O
 by	O
 tying	O
-a	O
-coreference	B-TaskName
+a	B-TaskName
+coreference	I-TaskName
 resolution	I-TaskName
 system	O
 to	O
-a	O
-relation	B-TaskName
+a	B-TaskName
+relation	I-TaskName
 extraction	I-TaskName
 system,	O
 enabling	O
@@ -1358,7 +1358,7 @@ us	O
 to	O
 reward	O
 the	O
-coreference	B-TaskName
+coreference	O
 system	O
 for	O
 making	O
@@ -1384,8 +1384,8 @@ we	O
 provide	O
 a	O
 bilingual	O
-parallel	B-TaskName
-human-to-human	I-TaskName
+parallel	O
+human-to-human	B-TaskName
 recommendation	I-TaskName
 dialog	O
 dataset	O
@@ -1401,8 +1401,8 @@ challenging	O
 task	O
 of	O
 multilingual	B-TaskName
-and	B-TaskName
-cross-lingual	B-TaskName
+and	I-TaskName
+cross-lingual	I-TaskName
 conversational	I-TaskName
 recommendation.	I-TaskName
 
@@ -1411,8 +1411,8 @@ SciERC,	I-DatasetName
 we	O
 use	O
 the	O
-indomain	O
-scibert-scivocab-uncased	B-MethodName
+indomain	B-DatasetName
+scibert-scivocab-uncased	I-DatasetName
 (Beltagy	O
 et	O
 al,	O
@@ -1452,8 +1452,8 @@ to	O
 all	O
 syn	O
 (+en-th	O
-wt+	B-MethodName
-muse)),	B-MethodName
+wt+	O
+muse)),	O
 achieved	O
 through	O
 the	O
@@ -1464,7 +1464,7 @@ both	O
 knowledge	O
 types:	O
 1)	O
-UMLS	B-MethodName
+UMLS	O
 synonyms	O
 in	O
 other	O
@@ -1625,12 +1625,12 @@ a	O
 pre-processed	O
 version	O
 of	O
-the	O
-GAD	B-DatasetName
+the	B-DatasetName
+GAD	I-DatasetName
 dataset	O
 provided	O
-by	O
-BioBERT,	B-DatasetName
+by	B-DatasetName
+BioBERT,	I-DatasetName
 which	O
 is	O
 split	O
@@ -1638,8 +1638,8 @@ for	O
 10-fold	B-HyperparameterValue
 cross-validation.	O
 
-For	B-DatasetName
-NER,	I-DatasetName
+For	O
+NER,	B-TaskName
 we	O
 observe	O
 improvements	O
@@ -1684,7 +1684,7 @@ and	O
 at	O
 least.	O
 
-For	B-DatasetName
+For	O
 Triframes	B-MethodName
 (Ustalov	O
 et	O
@@ -1705,7 +1705,7 @@ parameter	O
 k	B-HyperparameterName
 in	O
 the	O
-k-NN	B-MethodName
+k-NN	O
 graph	O
 construction	O
 step	O
@@ -1728,8 +1728,8 @@ ranker	B-MethodName
 outperforms	O
 the	O
 conventional	O
-dialog	B-MetricName
-perplexity	I-MetricName
+dialog	O
+perplexity	O
 baseline	O
 with	O
 a	O
@@ -1740,7 +1740,7 @@ predicting	O
 Reddit	O
 feedback.	O
 
-Back-translation	B-TaskName
+Back-translation	B-MethodName
 (BT;	B-MethodName
 Bojar	O
 and	O
@@ -1753,9 +1753,9 @@ et	O
 al	O
 2018a)	O
 is	O
-a	B-TaskName
-data	I-TaskName
-augmentation	I-TaskName
+a	O
+data	O
+augmentation	O
 method	O
 that	O
 is	O
@@ -1796,7 +1796,7 @@ unique	O
 program	O
 templates	O
 in	O
-D	O
+D	B-DatasetName
 par	I-DatasetName
 when	O
 K	B-HyperparameterName
@@ -1891,14 +1891,14 @@ the	O
 paraphrased	O
 canonical	O
 data	O
-D	O
-par	O
+D	B-DatasetName
+par	I-DatasetName
 for	O
 1,	B-HyperparameterValue
 500	I-HyperparameterValue
-steps	B-HyperparameterName
-(150	B-HyperparameterValue
-steps	B-HyperparameterName
+steps	O
+(150	O
+steps	O
 for	O
 warm-up)	O
 with	O
@@ -2044,7 +2044,7 @@ a	O
 linear	O
 map	O
 to	O
-R	B-HyperparameterValue
+R	B-HyperparameterName
 512	B-HyperparameterValue
 with	O
 ReLU	O
@@ -2058,7 +2058,7 @@ linear	O
 map	O
 back	O
 to	O
-R	B-HyperparameterName
+R	B-HyperparameterValue
 90,000	B-HyperparameterValue
 space	O
 with	O
@@ -2123,9 +2123,9 @@ to	O
 many	O
 other	O
 weakly	O
-supervised	O
-text	O
-classification	O
+supervised	B-TaskName
+text	I-TaskName
+classification	I-TaskName
 methods	O
 (Kuipers	O
 et	O
@@ -2188,7 +2188,7 @@ the	O
 model	O
 trained	O
 on	O
-FEVER	I-DatasetName
+FEVER	B-MethodName
 is	O
 not	O
 able	O
@@ -2206,10 +2206,10 @@ candidate	O
 database	O
 size	O
 (from	O
-one	B-HyperparameterValue
+one	O
 million	O
 to	O
-ten	B-HyperparameterValue
+ten	O
 million),	O
 we	O
 compare	O
@@ -2256,8 +2256,8 @@ costs	O
 at	O
 alignment	O
 time:	O
-c	O
-skip	O
+c	B-HyperparameterName
+skip	I-HyperparameterName
 =	O
 CDF	O
 −1	O
@@ -2294,7 +2294,7 @@ generation	I-TaskName
 as	O
 in	O
 other	O
-E2E	B-TaskName
+E2E	O
 models.	O
 
 Our	O
@@ -2317,7 +2317,7 @@ increase	O
 in	O
 F1	B-MetricName
 (exact	O
-match)	I-MetricName
+match)	O
 for	O
 the	O
 three	O
@@ -2355,7 +2355,7 @@ cases	O
 are	O
 complete	O
 with	O
-GECOR-generated	B-MethodName
+GECOR-generated	O
 words	O
 that	O
 do	O
@@ -2370,7 +2370,7 @@ build	O
 SentiBERT	B-MethodName
 on	O
 the	O
-HuggingFace	B-DatasetName
+HuggingFace	O
 library	O
 1	O
 and	O
@@ -2413,10 +2413,10 @@ a	O
 grid	O
 of	O
 16	B-HyperparameterValue
-log-probability	B-HyperparameterName
+log-probability	O
 points	O
 in	O
-[−3,	B-HyperparameterValue
+[−3,	O
 0],	B-HyperparameterValue
 which	O
 yielded	O
@@ -2469,8 +2469,8 @@ shows	O
 the	O
 benefits	O
 of	O
-multidomain	B-TaskName
-adaptation.	I-TaskName
+multidomain	O
+adaptation.	O
 
 The	O
 embedding	B-HyperparameterName
@@ -2549,7 +2549,7 @@ We	O
 present	O
 results	O
 for	O
-masking	O
+masking	B-MethodName
 BERT,	B-MethodName
 RoBERTa,	B-MethodName
 and	O
@@ -2557,7 +2557,7 @@ DistilBERT	B-MethodName
 in	O
 part-of-speech	B-TaskName
 tagging,	I-TaskName
-named-entity	B-TaskName
+named-entity	I-TaskName
 recognition,	I-TaskName
 sequence	B-TaskName
 classification,	I-TaskName
@@ -2726,7 +2726,7 @@ the	O
 model	O
 for	O
 20K	B-HyperparameterValue
-steps	B-HyperparameterName
+steps	O
 based	O
 on	O
 the	O
@@ -2877,7 +2877,7 @@ in	O
 different	O
 fields	O
 of	O
-NLP,	B-TaskName
+NLP,	O
 such	O
 as	B-TaskName
 natural	I-TaskName
@@ -3031,8 +3031,8 @@ focused	O
 on	O
 augmenting	O
 the	O
-Masked	O
-LM	O
+Masked	B-TaskName
+LM	I-TaskName
 task	O
 with	O
 clinical	O
@@ -3058,8 +3058,8 @@ the	O
 details	O
 of	O
 the	O
-Masked	O
-LM	O
+Masked	B-TaskName
+LM	I-TaskName
 task	O
 herein.	O
 
@@ -3093,8 +3093,8 @@ of	O
 the	O
 train	O
 split	O
-(D	O
-t	O
+(D	B-HyperparameterValue
+t	I-HyperparameterName
 ),	O
 with	O
 uniform	O
@@ -3110,7 +3110,7 @@ well	O
 the	O
 email	B-TaskName
 thread	I-TaskName
-summarization	O
+summarization	I-TaskName
 models	O
 perform	O
 and	O
@@ -3121,8 +3121,8 @@ between	O
 automatic	O
 metrics	O
 and	O
-human	B-MethodName
-judgment,	I-MethodName
+human	B-TaskName
+judgment,	I-TaskName
 we	O
 ask	O
 humans	O
@@ -3213,7 +3213,7 @@ As	O
 seen,	O
 the	O
 BLEU	B-MetricName
-score	I-MetricName
+score	O
 of	O
 best	O
 "External	O
@@ -3249,9 +3249,9 @@ rigorous	O
 process	O
 that	O
 involves	O
-rule-based	B-TaskName
-distant	I-TaskName
-supervision	I-TaskName
+rule-based	O
+distant	O
+supervision	O
 extraction	O
 from	O
 news-images	O
@@ -3265,7 +3265,7 @@ examples.	O
 
 For	O
 instance,	O
-Reformer	I-MethodName
+Reformer	B-MethodName
 (Kitaev	O
 et	O
 al,	O
@@ -3274,13 +3274,13 @@ is	O
 tested	O
 on	O
 the	O
-64k-chunk	B-DatasetName
+64k-chunk	O
 en-wik8	B-DatasetName
 dataset	O
 for	O
-unidirectional	O
-language	O
-modeling;	O
+unidirectional	B-TaskName
+language	I-TaskName
+modeling;	I-TaskName
 Performer	B-MethodName
 (Choromanski	O
 et	O
@@ -3291,7 +3291,7 @@ masked	B-MetricName
 language	I-MetricName
 modeling	I-MetricName
 (MLM)	B-MetricName
-perplexity	I-MetricName
+perplexity	O
 on	O
 the	O
 PG-19	B-DatasetName
@@ -3346,7 +3346,7 @@ Case	O
 3,	O
 even	O
 if	O
-PinyinGPT-Concat	O
+PinyinGPT-Concat	B-MethodName
 ranks	O
 the	O
 ground	O
@@ -3463,7 +3463,7 @@ translation	O
 of	O
 the	O
 SQuAD	B-DatasetName
-en	O
+en	I-DatasetName
 development	O
 set	O
 in	O
@@ -3495,9 +3495,9 @@ the	O
 confusion	O
 matrices	O
 of	O
-PDTB	B-MethodName
-3.0	I-MethodName
-L2	O
+PDTB	B-DatasetName
+3.0	I-DatasetName
+L2	I-DatasetName
 classification	O
 predictions,	O
 again	O
@@ -3547,8 +3547,8 @@ Phase	O
 To	O
 investigate	O
 whether	O
-language	B-TaskName
-generation	I-TaskName
+language	O
+generation	O
 models	O
 can	O
 serve	O
@@ -3595,7 +3595,7 @@ baseline	O
 goes	O
 widest	O
 for	O
-AMR	B-DatasetName
+AMR	O
 graphs	O
 with	O
 more	O
@@ -3625,8 +3625,8 @@ multilingual	B-TaskName
 sentence	I-TaskName
 embeddings	I-TaskName
 on	O
-downstream	O
-classification	O
+downstream	B-TaskName
+classification	I-TaskName
 tasks	O
 from	O
 the	B-DatasetName
@@ -3649,7 +3649,7 @@ model	O
 can	O
 gain	O
 consistent	O
-1∼2	B-MetricValue
+1∼2	B-MetricName
 BLEU	B-MetricName
 improvement	O
 over	O
@@ -3695,9 +3695,9 @@ ungrammatical	O
 (the	O
 classifier	B-MetricName
 score	I-MetricName
-less	B-MetricValue
+less	O
 than	O
-0.5).	B-MetricValue
+0.5).	B-HyperparameterValue
 
 In	O
 our	O
@@ -3710,13 +3710,13 @@ K	B-HyperparameterName
 (out	O
 of	O
 12	B-HyperparameterValue
-×	I-HyperparameterValue
-12	I-HyperparameterValue
+×	O
+12	B-HyperparameterValue
 =	O
 144)	B-HyperparameterValue
 heads	O
 in	O
-GPT-2	B-DatasetName
+GPT-2	B-MethodName
 and	O
 we	O
 report	O
@@ -3737,8 +3737,8 @@ a	O
 wider	O
 range	O
 of	O
-model	B-HyperparameterName
-depths	I-HyperparameterName
+model	O
+depths	O
 for	O
 Transformer+DS-Init+MAtt	B-MethodName
 with	O
@@ -3870,7 +3870,7 @@ Paraphraser	O
 We	O
 finetune	O
 the	O
-paraphraser	O
+paraphraser	B-MethodName
 using	O
 a	O
 batch	B-HyperparameterName
@@ -3908,8 +3908,8 @@ high	O
 precision	B-MetricName
 (P	B-MetricName
 ,	O
-P	O
-w	O
+P	B-MetricName
+w	I-MetricName
 )	O
 for	O
 the	O
@@ -3922,7 +3922,7 @@ link	O
 between	O
 the	O
 tasks	O
-of	O
+of	B-TaskName
 emotion	I-TaskName
 recognition	I-TaskName
 and	O
@@ -3959,8 +3959,8 @@ achieve	O
 low	O
 recall	B-MetricName
 (R,	B-MetricName
-R	O
-w	O
+R	B-MetricName
+w	I-MetricName
 )	O
 for	O
 IE/IS	O
@@ -4015,7 +4015,7 @@ of	O
 (vs.	O
 0.45	B-MetricValue
 for	O
-human-written	B-MethodName
+human-written	O
 answers),	O
 suggesting	O
 that	O
