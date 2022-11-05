@@ -335,10 +335,12 @@ def ner_pipeline(args, sent, model, tokenizer):
     if args.model_type == 'bert':
         preds = torch.argmax(logits, dim=-1)[0].tolist()
     else:
+        # A SMALL TRICK FOR TEST
         # since our training data has much denser label
         # while testing data has much sparser label
         # we want to modify the logits to increase the rate of "O" label
         logits[:, :, 0] += 7
+        # ==========================
         preds = model.crf.decode(logits)[0]
 
     token_starts = [1 - int(token.startswith('##')) for token in tokenized_sent]
