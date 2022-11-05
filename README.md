@@ -4,7 +4,7 @@ The project is related to [nlp-from-scratch-assignment-2022](https://github.com/
 
 ## Task
 
-This project is working on the task of *scientific entity recognition*, specifically in the domain of NLP papers from recent NLP conferences (e.g. ACL, EMNLP, and NAACL). Specifically, we will ask you to identify entities such as task names, model names, hyperparameter names and their values, and metric names and their values in these papers.
+This project is working on the task of *scientific entity recognition*, specifically in the domain of NLP papers from recent NLP conferences (e.g. ACL, EMNLP, and NAACL). Specifically, we try to identify entities such as task names, model names, hyperparameter names and their values, and metric names and their values in these papers.
 
 7 kinds of entities including seven varieties of entity: `MethodName`, `HyperparameterName`, `HyperparameterValue`, `MetricName`, `MetricValue`, `TaskName`, and `DatasetName` are defined as scientific entities in this task. More information related to the annotation of entities can be seen in [annotation standard](https://github.com/neubig/nlp-from-scratch-assignment-2022/blob/main/annotation_standard.md).
 
