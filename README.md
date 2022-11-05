@@ -86,7 +86,7 @@ Such command enables you to generate the submitted form of CONLL file and submit
 The basic usage of ExplainaBoard is shown below (please make sure you use the latest version of `explainaboard_client` otherwise might cause warning and error):
 
 ```
-pip install --upgrade --force-reinstall explainaboard_client==0.0.11 (should the latest version) explainaboard_api_client==0.2.8
+pip install --upgrade --force-reinstall explainaboard_client==0.0.11 (should be the latest version) explainaboard_api_client==0.2.8
 ```
 
 Set the username and API key for the client:
