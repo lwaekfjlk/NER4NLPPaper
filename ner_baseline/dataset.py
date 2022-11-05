@@ -7,8 +7,8 @@ from torch.nn.utils.rnn import pad_sequence
 class SciNERDataset(Dataset):
     def __init__(self, args, tokenizer, split, sep=' -X- _ '):
         self.tokenizer = tokenizer
-        self.entity2id = {e: i for i, e in enumerate(self.args.id2entity)}
-        self.id2entity = {i: e for i, e in enumerate(self.args.id2entity)}
+        self.entity2id = {e: i for i, e in enumerate(args.id2entity)}
+        self.id2entity = {i: e for i, e in enumerate(args.id2entity)}
         self.cls = self.tokenizer.cls_token_id
         self.sep = self.tokenizer.sep_token_id
         self.pad = self.tokenizer.pad_token_id
@@ -72,7 +72,8 @@ class SciNERDataset(Dataset):
         
         input_ids = pad_sequence(input_ids, batch_first=True, padding_value=self.pad)
         token_starts = pad_sequence(token_starts, batch_first=True, padding_value=0)
-        labels = pad_sequence(labels, batch_first=True, padding_value=0)
+        # in order to avoid CUDA error caused by pytorchcrf, we need to pad to -1
+        labels = pad_sequence(labels, batch_first=True, padding_value=-1) 
         attention_mask = torch.ne(input_ids, self.pad)
 
         return {

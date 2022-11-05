@@ -14,6 +14,7 @@ from transformers import AutoTokenizer, AutoConfig
 from transformers import AdamW, get_cosine_schedule_with_warmup
 from dataset import SciNERDataset
 from torch.utils.data import DataLoader
+from torch.nn.utils.rnn import pad_sequence
 from torch.nn.parallel import DistributedDataParallel as DDP
 from torchcrf import CRF
 from model import BertCRF, BertBiLSTMCRF, Bert
@@ -131,19 +132,19 @@ def attach_model(args):
     device = torch.device(args.local_rank) if args.local_rank != -1 else torch.device('cuda')
     model.to(device)
 
-    if args.load_from_ckpt:
-        model_dict = torch.load(args.load_from_ckpt)
-        bert_model_dict = {k: v for k, v in model_dict.items() if 'classifier' not in k}
-        model_dict.update(bert_model_dict)
-        model.load_state_dict(bert_model_dict, strict=False)
-
-    if torch.cuda.device_count() > 1:
-        distributed_setup(args, model)
+    if args.local_rank != -1:
+        set_distributed(args, model)
         model = torch.nn.parallel.DistributedDataParallel(
             model, 
             device_ids=[args.local_rank], 
             output_device=args.local_rank
         )
+
+    if args.load_from_ckpt:
+        model_dict = torch.load(args.load_from_ckpt)
+        bert_model_dict = {k: v for k, v in model_dict.items() if 'classifier' not in k}
+        model_dict.update(bert_model_dict)
+        model.load_state_dict(bert_model_dict, strict=False)
     return model
 
 
@@ -164,9 +165,9 @@ def attach_optimizer(args, model):
         ]
         if args.model_type == 'bertcrf':
             optimizer_grouped_parameters += [
-                {'params': model.crf.parameters(), 'lr': args.learning_rate * 5},
+                {'params': model.crf.parameters(), 'lr': args.learning_rate * 10},
             ]
-        if args.model_type == 'bertbilstmcrf':
+        elif args.model_type == 'bertbilstmcrf':
             lstm_optimizer = list(model.bilstm.named_parameters())
             optimizer_grouped_parameters += [
                 {'params': model.crf.parameters(), 'lr': args.learning_rate * 5},
@@ -184,7 +185,7 @@ def attach_optimizer(args, model):
 def attach_scheduler(args, optimizer, train_dataloader):
     train_steps_per_epoch = len(train_dataloader)
     total_training_steps = args.num_epochs * train_steps_per_epoch // args.gradient_accumulation_step
-    total_warmup_steps = (args.num_epochs // 10) * train_steps_per_epoch // args.gradient_accumulation_step
+    total_warmup_steps = (args.num_epochs // 5) * train_steps_per_epoch // args.gradient_accumulation_step
     if args.scheduler_type == 'cosine':
         scheduler = get_cosine_schedule_with_warmup(
             optimizer,
@@ -233,24 +234,32 @@ def validate(args, dev_dataloader, model):
             outputs = model(
                 input_ids=batch['input_ids'],
                 token_starts=batch['token_starts'],
-                labels=batch['labels'], 
+                labels=batch['labels'],
                 attention_mask=batch['attention_mask'],
             )
             loss = outputs[0]
+            losses.append(loss.item())
             logits = outputs[1]
-            pred = torch.argmax(logits, dim=-1)
+            if args.model_type == 'bert':
+                pred = torch.argmax(logits, dim=-1)
+            else:
+                label_mask = batch['labels'].gt(-1)
+                pred = model.crf.decode(logits, mask=label_mask)
+                pred = [torch.LongTensor(p) for p in pred]
+                pred = pad_sequence(pred, batch_first=True, padding_value=-1)
+            
             ref = batch['labels']
-            losses.append(loss.item()) 
-            preds.append(pred.view(-1).tolist())
             refs.append(ref.view(-1).tolist())
+            preds.append(pred.view(-1).tolist())
+            
 
     metric = evaluate.load("seqeval")
     predictions = [
-        [args.id2entity[p] for (p, l) in zip(pred, ref) if l != -100]
+        [args.id2entity[p] for (p, l) in zip(pred, ref) if l != -1]
         for pred, ref in zip(preds, refs)
     ]
     references = [
-        [args.id2entity[l] for (p, l) in zip(pred, ref) if l != -100]
+        [args.id2entity[l] for (p, l) in zip(pred, ref) if l != -1]
         for pred, ref in zip(preds, refs)
     ]
     f1 = metric.compute(predictions=predictions, references=references)['overall_f1']
@@ -274,27 +283,31 @@ def train(args, model, tokenizer):
     model.train()
 
     step_losses = []
+    scaler = torch.cuda.amp.GradScaler(enabled=args.use_fp16)
     train_iter = trange(args.num_epochs, desc="Epoch", disable=0)
     for epoch in train_iter:
         epoch_iter = tqdm(train_dataloader, desc="Iteration", disable=-1)
         for batch in epoch_iter:
             model.train()
-            outputs = model(
-                input_ids=batch['input_ids'],
-                token_starts=batch['token_starts'],
-                labels=batch['labels'], 
-                attention_mask=batch['attention_mask'],
-            )
-            loss = outputs[0]
-            loss.backward()
-            step_losses.append(loss.item())
+            with torch.cuda.amp.autocast(enabled=args.use_fp16):
+                outputs = model(
+                    input_ids=batch['input_ids'],
+                    token_starts=batch['token_starts'],
+                    labels=batch['labels'], 
+                    attention_mask=batch['attention_mask'],
+                )
+                loss = outputs[0]
+                scaler.scale(loss).backward()
+                step_losses.append(loss.item())
+
             iteration += 1
             if iteration % args.gradient_accumulation_step == 0:
                 torch.nn.utils.clip_grad_norm_(
                     parameters=model.parameters(), 
                     max_norm=args.max_norm
                 )
-                optimizer.step()
+                scaler.step(optimizer)
+                scaler.update()
                 optimizer.zero_grad()
                 scheduler.step()
                 
@@ -328,10 +341,13 @@ def ner_pipeline(args, sent, model, tokenizer):
         input_ids=input_ids,
         token_starts=token_starts,
     )
-    logits = outputs[-1]
+    logits = outputs[0]
     entities = []
     words = []
-    preds = torch.argmax(logits, dim=-1)[0].tolist()
+    if args.model_type == 'bert':
+        preds = torch.argmax(logits, dim=-1)[0].tolist()
+    else:
+        preds = model.crf.decode(logits)[0]
 
     token_starts = [1 - int(token.startswith('##')) for token in tokenized_sent]
     for token_start, token in zip(token_starts, tokenized_sent):
@@ -381,7 +397,7 @@ def inference(args, model, tokenizer):
     return
 
 
-def distributed_setup(args, model):
+def set_distributed(args, model):
     torch.cuda.set_device(args.local_rank)
     torch.distributed.init_process_group(backend='nccl')
     args.device = torch.device('cuda', args.local_rank)
@@ -420,6 +436,7 @@ if __name__ == '__main__':
     parser.add_argument('--use_wandb', action='store_true')
     parser.add_argument('--max_norm', type=float, default=5.0)
     parser.add_argument('--weight_decay', type=float, default=0.01)
+    parser.add_argument('--use_fp16', action='store_true')
     parser.add_argument('-n', '--id2entity', nargs='+', default=[
         'O',
         'B-MethodName', 'I-MethodName', 'B-HyperparameterName', 'I-HyperparameterName',
