@@ -186,8 +186,9 @@ def attach_scheduler(args, optimizer, train_dataloader):
 
 
 def save_model(best_ckpt_name, metric, best_metric):
-    if (args.model_chosen_metric == 'f1' and metric['f1'] > best_metric['f1']) or \
-       (args.model_chosen_metric == 'loss' and metric['loss'] < best_metric['loss']):
+    eps = 1e-5
+    if (args.model_chosen_metric == 'f1' and metric['f1'] > best_metric['f1'] + eps) or \
+       (args.model_chosen_metric == 'loss' and metric['loss'] < best_metric['loss'] - eps):
         if best_ckpt_name is not None:
             os.remove(os.path.join(args.ckpt_save_dir,best_ckpt_name))
         best_ckpt_name = 'best_{}4{}_{}_{}_{}.ckpt'.format(
@@ -332,15 +333,15 @@ def ner_pipeline(args, sent, model, tokenizer):
     logits = outputs[0]
     entities = []
     words = []
+    # A SMALL TRICK FOR TEST
+    # since our training data has much denser label
+    # while testing data has much sparser label
+    # we want to modify the logits to increase the rate of "O" label
+    logits[:, :, 0] += 7
+    # ==========================
     if args.model_type == 'bert':
         preds = torch.argmax(logits, dim=-1)[0].tolist()
     else:
-        # A SMALL TRICK FOR TEST
-        # since our training data has much denser label
-        # while testing data has much sparser label
-        # we want to modify the logits to increase the rate of "O" label
-        logits[:, :, 0] += 7
-        # ==========================
         preds = model.crf.decode(logits)[0]
 
     token_starts = [1 - int(token.startswith('##')) for token in tokenized_sent]
