@@ -19,5 +19,4 @@ python -m torch.distributed.launch --nproc_per_node=$NGPU --master_port 29519 ..
 --max_length 512 \
 --num_epochs 50 \
 --learning_rate 2e-5 \
---evaluation_steps 50 \
---load_from_ckpt ../checkpoints/best_model4scirex-finetune.ckpt
+--evaluation_steps 50

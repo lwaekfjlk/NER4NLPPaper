@@ -1,7 +1,8 @@
-export CUDA_VISIBLE_DEVICES=1
+export CUDA_VISIBLE_DEVICES=2
 export NGPU=1
 python -m torch.distributed.launch --nproc_per_node=$NGPU --master_port 29519 ../main.py \
 --train \
+--use_fp16 \
 --use_wandb \
 --model_type bertbilstmcrf \
 --model_name allenai/scibert_scivocab_uncased \
@@ -17,5 +18,5 @@ python -m torch.distributed.launch --nproc_per_node=$NGPU --master_port 29519 ..
 --dev_batch_size 8 \
 --max_length 512 \
 --num_epochs 50 \
---learning_rate 3e-5 \
+--learning_rate 2e-5 \
 --evaluation_steps 50

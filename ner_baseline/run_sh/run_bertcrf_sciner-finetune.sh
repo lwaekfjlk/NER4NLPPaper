@@ -1,10 +1,10 @@
-export CUDA_VISIBLE_DEVICES=0
+export CUDA_VISIBLE_DEVICES=1
 export NGPU=1
 python -m torch.distributed.launch --nproc_per_node=$NGPU --master_port 29519 ../main.py \
 --train \
 --use_fp16 \
 --use_wandb \
---model_type bert \
+--model_type bertcrf \
 --model_name allenai/scibert_scivocab_uncased \
 --dataset sciner \
 --train_file ../data/sciner_dataset/train.conll \
@@ -19,5 +19,4 @@ python -m torch.distributed.launch --nproc_per_node=$NGPU --master_port 29519 ..
 --max_length 512 \
 --num_epochs 50 \
 --learning_rate 2e-5 \
---evaluation_steps 50 \
---load_from_ckpt ../checkpoints/best_model4scirex-finetune.ckpt
+--evaluation_steps 50
