@@ -442,4 +442,4 @@ if __name__ == '__main__':
     if args.train:
         train(args, model, tokenizer)
     elif args.inference:
-        conll_result = inference(args, model, tokenizer)
+        inference(args, model, tokenizer)
