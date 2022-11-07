@@ -7,7 +7,6 @@ import shutil
 import evaluate
 import logging
 import wandb
-import torch.distributed as dist
 import torch.nn.functional as F
 from tqdm import tqdm, trange
 from transformers import AutoTokenizer, AutoConfig
@@ -15,7 +14,6 @@ from transformers import AdamW, get_cosine_schedule_with_warmup
 from dataset import SciNERDataset
 from torch.utils.data import DataLoader
 from torch.nn.utils.rnn import pad_sequence
-from torch.nn.parallel import DistributedDataParallel as DDP
 from torchcrf import CRF
 from model import BertCRF, BertBiLSTMCRF, Bert
 
@@ -47,44 +45,18 @@ def attach_dataloader(args, tokenizer):
     if args.train:
         train_dataset = SciNERDataset(args, tokenizer, 'train')
         dev_dataset = SciNERDataset(args, tokenizer, 'dev')
-        if torch.cuda.device_count() > 1:
-            train_sampler = torch.utils.data.distributed.DistributedSampler(
-                train_dataset, 
-                num_replicas=dist.get_world_size(), 
-                rank=dist.get_rank(), 
-                shuffle=True
-            )
-            dev_sampler = torch.utils.data.distributed.DistributedSampler(
-                dev_dataset, 
-                num_replicas=dist.get_world_size(), 
-                rank=dist.get_rank(), 
-                shuffle=True
-            )
-            train_dataloader = DataLoader(
-                train_dataset, 
-                batch_size=args.train_batch_size, 
-                sampler=train_sampler, 
-                collate_fn=lambda x: train_dataset.collate_fn(x, args)
-            )
-            dev_dataloader = DataLoader(
-                dev_dataset, 
-                batch_size=args.dev_batch_size, 
-                sampler=dev_sampler, 
-                collate_fn=lambda x: dev_dataset.collate_fn(x, args)
-            )
-        else:
-            train_dataloader = DataLoader(
-                train_dataset,  
-                batch_size=args.train_batch_size, 
-                shuffle=True, 
-                collate_fn=lambda x: train_dataset.collate_fn(x, args)
-            )
-            dev_dataloader = DataLoader(
-                dev_dataset, 
-                batch_size=args.dev_batch_size, 
-                shuffle=True, 
-                collate_fn=lambda x: dev_dataset.collate_fn(x, args)
-            )
+        train_dataloader = DataLoader(
+            train_dataset,  
+            batch_size=args.train_batch_size, 
+            shuffle=True, 
+            collate_fn=lambda x: train_dataset.collate_fn(x, args)
+        )
+        dev_dataloader = DataLoader(
+            dev_dataset, 
+            batch_size=args.dev_batch_size, 
+            shuffle=True, 
+            collate_fn=lambda x: dev_dataset.collate_fn(x, args)
+        )
         loader_dict['train'] = train_dataloader
         loader_dict['dev'] = dev_dataloader
 
