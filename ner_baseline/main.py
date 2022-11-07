@@ -32,11 +32,8 @@ def set_seed(args):
 def set_wandb(args):
     if args.use_wandb:
         # need to change to your own API when using
-        os.environ['EXP_NUM'] = 'SciNER'
-        os.environ['WANDB_NAME'] = args.timestamp
-        os.environ['WANDB_API_KEY'] = '972035264241fb0f6cc3cab51a5d82f47ca713db'
-        os.environ['WANDB_DIR'] = '../SciNER_tmp'
-        wandb.init(project="SciNER")
+        #os.environ['WANDB_API_KEY'] = '972035264241fb0f6cc3cab51a5d82f47ca713db'
+        wandb.init(project="SciNER", name=args.timestamp, config=args, dir='../SciNER_tmp')
     return
 
 
@@ -309,7 +306,7 @@ def ner_pipeline(args, sent, model, tokenizer):
     # since our training data has much denser label
     # while testing data has much sparser label
     # we want to modify the logits to increase the rate of "O" label
-    logits[:, :, 0] += 7
+    # logits[:, :, 0] += 7
     # ==========================
     if args.model_type == 'bert':
         preds = torch.argmax(logits, dim=-1)[0].tolist()
