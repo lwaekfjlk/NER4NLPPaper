@@ -368,8 +368,8 @@ if __name__ == '__main__':
     parser.add_argument('--task', type=str, default='sciner-finetune', choices=['sciner-finetune'])
     parser.add_argument('--model_name', type=str, default='allenai/scibert_scivocab_uncased')
     parser.add_argument('--train_file', type=str, default='./data/sciner_dataset/train.conll')
-    parser.add_argument('--dev_file', type=str, default='./data/sciner_dataset/validation.conll'
-    parser.add_argument('--test_file', type=str, default='./data/sciner_dataset/validation.conll'
+    parser.add_argument('--dev_file', type=str, default='./data/sciner_dataset/validation.conll')
+    parser.add_argument('--test_file', type=str, default='./data/sciner_dataset/validation.conll')
     parser.add_argument('--inference_file', type=str, default='./data/anlp_test/anlp-sciner-test.txt')
     parser.add_argument('--output_file', type=str, default='./data/anlp_test/anlp_haofeiy_sciner.conll')
     parser.add_argument('--load_from_ckpt', type=str, default=None)
