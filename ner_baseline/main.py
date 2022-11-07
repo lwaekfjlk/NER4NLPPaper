@@ -275,12 +275,14 @@ def train(args, model, tokenizer):
                     best_ckpt_name, best_metric = save_model(best_ckpt_name, metric, best_metric)
                     logging.info('eval f1 : {}'.format(metric['f1']))
                     logging.info('eval loss : {}'.format(metric['loss']))
+                    if args.use_wandb:
+                        wandb.log({'eval_f1': metric['f1'], 'step': step})
+                        wandb.log({'eval_loss': metric['loss'], 'step': step})
 
                 if args.use_wandb:
                     wandb.log({'train loss': sum(step_losses)/len(step_losses), 'step': step})
                     wandb.log({'learning rate': scheduler.get_last_lr()[0], 'step': step})
-                    wandb.log({'eval_f1': metric['f1'], 'step': step})
-                    wandb.log({'eval_loss': metric['loss'], 'step': step})
+                    
                 step_losses = []
                     
     save_final_model(best_ckpt_name)
